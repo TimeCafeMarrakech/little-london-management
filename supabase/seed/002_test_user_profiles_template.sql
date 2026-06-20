@@ -1,0 +1,53 @@
+-- Little London Management System
+-- Template for linking Supabase Auth users to application roles.
+--
+-- 1. Create users in Supabase Auth first.
+-- 2. Copy each Auth user UUID.
+-- 3. Replace the placeholder UUIDs and emails below.
+-- 4. Run this script manually in Supabase SQL editor or via your migration workflow.
+--
+-- Do not commit real user emails or private credentials to source control.
+
+-- Example:
+-- insert into public.user_profiles (id, role_id, full_name, email, status)
+-- select
+--   '00000000-0000-0000-0000-000000000001'::uuid,
+--   r.id,
+--   'Super Admin Test User',
+--   'super-admin@example.com',
+--   'active'
+-- from public.roles r
+-- where r.name = 'super_admin'
+-- on conflict (id) do update set
+--   role_id = excluded.role_id,
+--   full_name = excluded.full_name,
+--   email = excluded.email,
+--   status = excluded.status;
+
+-- Super Admin test profile
+-- Replace AUTH_USER_UUID_SUPER_ADMIN and EMAIL_SUPER_ADMIN before running.
+-- insert into public.user_profiles (id, role_id, full_name, email, status)
+-- select 'AUTH_USER_UUID_SUPER_ADMIN'::uuid, r.id, 'Super Admin Test User', 'EMAIL_SUPER_ADMIN', 'active'
+-- from public.roles r where r.name = 'super_admin'
+-- on conflict (id) do update set role_id = excluded.role_id, full_name = excluded.full_name, email = excluded.email, status = excluded.status;
+
+-- Admin test profile
+-- Replace AUTH_USER_UUID_ADMIN and EMAIL_ADMIN before running.
+-- insert into public.user_profiles (id, role_id, full_name, email, status)
+-- select 'AUTH_USER_UUID_ADMIN'::uuid, r.id, 'Admin Test User', 'EMAIL_ADMIN', 'active'
+-- from public.roles r where r.name = 'admin'
+-- on conflict (id) do update set role_id = excluded.role_id, full_name = excluded.full_name, email = excluded.email, status = excluded.status;
+
+-- Teacher test profile
+-- Replace AUTH_USER_UUID_TEACHER and EMAIL_TEACHER before running.
+-- insert into public.user_profiles (id, role_id, full_name, email, status)
+-- select 'AUTH_USER_UUID_TEACHER'::uuid, r.id, 'Teacher Test User', 'EMAIL_TEACHER', 'active'
+-- from public.roles r where r.name = 'teacher'
+-- on conflict (id) do update set role_id = excluded.role_id, full_name = excluded.full_name, email = excluded.email, status = excluded.status;
+
+-- Parent test profile
+-- Replace AUTH_USER_UUID_PARENT and EMAIL_PARENT before running.
+-- insert into public.user_profiles (id, role_id, full_name, email, status)
+-- select 'AUTH_USER_UUID_PARENT'::uuid, r.id, 'Parent Test User', 'EMAIL_PARENT', 'active'
+-- from public.roles r where r.name = 'parent'
+-- on conflict (id) do update set role_id = excluded.role_id, full_name = excluded.full_name, email = excluded.email, status = excluded.status;
