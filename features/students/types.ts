@@ -66,6 +66,16 @@ export type StudentStatusHistoryItem = {
   changedAt: string;
 };
 
+export type StudentEnrolmentSummary = {
+  id: string;
+  classId: string;
+  classCode: string;
+  className: string;
+  courseName: string;
+  enrolmentDate: string;
+  status: "active" | "completed" | "withdrawn" | "archived";
+};
+
 export type StudentDetail = StudentListItem & {
   gender: string | null;
   medicalNotes: string | null;
@@ -75,6 +85,7 @@ export type StudentDetail = StudentListItem & {
   allergies: AllergySummary[];
   medicalProfile: MedicalProfileSummary | null;
   statusHistory: StudentStatusHistoryItem[];
+  enrolments: StudentEnrolmentSummary[];
   createdAt: string;
   updatedAt: string;
 };

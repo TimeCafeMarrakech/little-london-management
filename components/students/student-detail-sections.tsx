@@ -42,11 +42,20 @@ export function StudentDetailSections({ student }: StudentDetailSectionsProps) {
           <CalendarDays className="h-5 w-5 text-primary" aria-hidden="true" />
           <h2 className="text-lg font-semibold">Enrollment summary</h2>
         </div>
-        <div className="mt-4 rounded-md bg-muted/45 p-4">
-          <p className="font-semibold">Enrollment details arrive in Phase 7.</p>
-          <p className="mt-2 text-sm leading-6 text-muted-foreground">
-            This placeholder keeps the student profile ready for course and class assignments without building those modules early.
-          </p>
+        <div className="mt-4 space-y-3">
+          {student.enrolments.length > 0 ? (
+            student.enrolments.map((enrolment) => (
+              <article className="rounded-md bg-muted/45 p-4" key={enrolment.id}>
+                <p className="font-semibold">{enrolment.className}</p>
+                <p className="mt-1 text-sm text-muted-foreground">{enrolment.courseName}</p>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  {enrolment.classCode} - {enrolment.status} since {enrolment.enrolmentDate}
+                </p>
+              </article>
+            ))
+          ) : (
+            <EmptyLine>No class enrolments recorded yet.</EmptyLine>
+          )}
         </div>
       </section>
 
