@@ -33,6 +33,10 @@ function errorState(error: unknown): StudentActionState {
     return validationState("A student with this number already exists.");
   }
 
+  if (message.includes("could not be saved")) {
+    return validationState(message);
+  }
+
   return validationState(defaultErrorMessage);
 }
 

@@ -38,8 +38,19 @@ type CountRow = {
   student_id: string;
 };
 
+class StudentMutationError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "StudentMutationError";
+  }
+}
+
 async function createStudentSupabaseClient(): Promise<SupabaseClient> {
   return (await createSupabaseServerClient()) as unknown as SupabaseClient;
+}
+
+function throwRelatedRecordError(label: string, message?: string): never {
+  throw new StudentMutationError(`${label} could not be saved. ${message ?? "Please check the details and try again."}`);
 }
 
 export function canManageStudents(profile: UserProfile): boolean {
@@ -123,11 +134,18 @@ export async function listStudents(profile: UserProfile, filters: StudentListQue
     .select(
       "id, student_number, first_name, last_name, full_name, date_of_birth, gender, primary_language, school_name, medical_notes, emergency_notes, status, created_at, updated_at",
       { count: "exact" },
-    )
-    .is("deleted_at", null);
+    );
 
-  if (filters.status !== "all") {
+  if (filters.status === "archived") {
     query = query.eq("status", filters.status);
+  } else {
+    query = query.is("deleted_at", null);
+
+    if (filters.status !== "all") {
+      query = query.eq("status", filters.status);
+    } else {
+      query = query.neq("status", "archived");
+    }
   }
 
   if (filters.query) {
@@ -221,7 +239,6 @@ export async function getStudentDetail(profile: UserProfile, studentId: string):
     .from("students")
     .select("id, student_number, first_name, last_name, full_name, date_of_birth, gender, primary_language, school_name, medical_notes, emergency_notes, status, created_at, updated_at")
     .eq("id", studentId)
-    .is("deleted_at", null)
     .maybeSingle();
 
   if (error) {
@@ -467,7 +484,7 @@ async function syncStudentRelatedRecords(studentId: string, profile: UserProfile
   const supabase = await createStudentSupabaseClient();
 
   if (input.parentName) {
-    await supabase.from("parent_student_relationships").insert({
+    const { error } = await supabase.from("parent_student_relationships").insert({
       student_id: studentId,
       parent_full_name: input.parentName,
       parent_email: input.parentEmail,
@@ -480,10 +497,14 @@ async function syncStudentRelatedRecords(studentId: string, profile: UserProfile
       created_by: profile.id,
       updated_by: profile.id,
     });
+
+    if (error) {
+      throwRelatedRecordError("Parent relationship", error.message);
+    }
   }
 
   if (input.emergencyContactName && input.emergencyContactRelationship && input.emergencyContactPhone) {
-    await supabase.from("emergency_contacts").insert({
+    const { error } = await supabase.from("emergency_contacts").insert({
       student_id: studentId,
       full_name: input.emergencyContactName,
       relationship: input.emergencyContactRelationship,
@@ -492,10 +513,14 @@ async function syncStudentRelatedRecords(studentId: string, profile: UserProfile
       created_by: profile.id,
       updated_by: profile.id,
     });
+
+    if (error) {
+      throwRelatedRecordError("Emergency contact", error.message);
+    }
   }
 
   if (input.doctorName || input.doctorPhone || input.medicalConditions || input.medicationNotes || input.dietaryRequirements) {
-    await supabase.from("student_medical_profiles").upsert(
+    const { error } = await supabase.from("student_medical_profiles").upsert(
       {
         student_id: studentId,
         doctor_name: input.doctorName,
@@ -508,10 +533,14 @@ async function syncStudentRelatedRecords(studentId: string, profile: UserProfile
       },
       { onConflict: "student_id" },
     );
+
+    if (error) {
+      throwRelatedRecordError("Medical profile", error.message);
+    }
   }
 
   if (input.allergyName) {
-    await supabase.from("student_allergies").insert({
+    const { error } = await supabase.from("student_allergies").insert({
       student_id: studentId,
       allergen: input.allergyName,
       severity: input.allergySeverity ?? "unknown",
@@ -519,6 +548,10 @@ async function syncStudentRelatedRecords(studentId: string, profile: UserProfile
       created_by: profile.id,
       updated_by: profile.id,
     });
+
+    if (error) {
+      throwRelatedRecordError("Allergy", error.message);
+    }
   }
 }
 
@@ -531,11 +564,15 @@ async function recordStudentStatusChange(
 ): Promise<void> {
   const supabase = await createStudentSupabaseClient();
 
-  await supabase.from("student_status_history").insert({
+  const { error } = await supabase.from("student_status_history").insert({
     student_id: studentId,
     from_status: fromStatus,
     to_status: toStatus,
     reason,
     changed_by: actorId,
   });
+
+  if (error) {
+    throwRelatedRecordError("Status history", error.message);
+  }
 }
