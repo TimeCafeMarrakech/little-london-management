@@ -10,5 +10,4 @@ dist/
 .env.production.local
 *.log
 *.tsbuildinfo
-vercel.json
 .npm-cache/
