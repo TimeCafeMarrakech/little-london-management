@@ -24,6 +24,7 @@ export type NavigationItem = {
   label: string;
   description: string;
   icon: ComponentType<{ className?: string }>;
+  href?: string;
   active?: boolean;
   disabled?: boolean;
 };
@@ -59,28 +60,29 @@ export const roleLabels: Record<UserRole, string> = {
 
 export const roleNavigation: Record<UserRole, NavigationItem[]> = {
   super_admin: [
-    { label: "Overview", description: "Platform command centre", icon: Home, active: true },
-    { label: "People", description: "Students, parents, teachers", icon: Users, disabled: true },
+    { label: "Overview", description: "Platform command centre", icon: Home, href: "/dashboard", active: true },
+    { label: "Students", description: "Profiles and care notes", icon: Users, href: "/students" },
     { label: "Operations", description: "Classes and attendance", icon: ClipboardCheck, disabled: true },
     { label: "Finance", description: "Revenue and balances", icon: WalletCards, disabled: true },
     { label: "Settings", description: "System and access", icon: ShieldCheck, disabled: true },
   ],
   admin: [
-    { label: "Overview", description: "Daily management snapshot", icon: Home, active: true },
-    { label: "Enrolments", description: "Pipeline and families", icon: GraduationCap, disabled: true },
+    { label: "Overview", description: "Daily management snapshot", icon: Home, href: "/dashboard", active: true },
+    { label: "Students", description: "Profiles and care notes", icon: GraduationCap, href: "/students" },
     { label: "Attendance", description: "Daily attendance view", icon: ClipboardCheck, disabled: true },
     { label: "Finance", description: "Payments and invoices", icon: CreditCard, disabled: true },
     { label: "Announcements", description: "School communications", icon: Megaphone, disabled: true },
   ],
   teacher: [
-    { label: "Today", description: "Classes and tasks", icon: Home, active: true },
+    { label: "Today", description: "Classes and tasks", icon: Home, href: "/dashboard", active: true },
+    { label: "Students", description: "Assigned-only view", icon: Users, href: "/students" },
     { label: "Schedule", description: "Weekly teaching flow", icon: CalendarDays, disabled: true },
     { label: "Attendance", description: "Class check-in", icon: ClipboardCheck, disabled: true },
     { label: "Notes", description: "Lesson notes and remarks", icon: BookOpen, disabled: true },
     { label: "Announcements", description: "Staff updates", icon: Bell, disabled: true },
   ],
   parent: [
-    { label: "Family", description: "Children overview", icon: Heart, active: true },
+    { label: "Family", description: "Children overview", icon: Heart, href: "/dashboard", active: true },
     { label: "Schedule", description: "Upcoming classes", icon: CalendarDays, disabled: true },
     { label: "Progress", description: "Teacher updates", icon: Star, disabled: true },
     { label: "Payments", description: "Invoices and receipts", icon: CreditCard, disabled: true },

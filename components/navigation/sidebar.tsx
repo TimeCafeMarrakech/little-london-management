@@ -1,4 +1,5 @@
 import { ChevronRight } from "lucide-react";
+import Link from "next/link";
 
 import { roleLabels, roleNavigation } from "@/lib/dashboard/data";
 import type { UserProfile } from "@/lib/auth/types";
@@ -29,15 +30,15 @@ export function Sidebar({ profile }: SidebarProps) {
             const Icon = item.icon;
 
             return (
-              <button
+              <Link
                 aria-disabled={item.disabled}
                 className={cn(
                   "group flex w-full items-center gap-3 rounded-lg px-3 py-3 text-left transition",
                   item.active ? "bg-primary text-primary-foreground shadow-soft" : "text-muted-foreground hover:bg-muted",
                   item.disabled && "cursor-not-allowed opacity-65",
                 )}
+                href={item.disabled || !item.href ? "#" : item.href}
                 key={item.label}
-                type="button"
               >
                 <span
                   className={cn(
@@ -54,7 +55,7 @@ export function Sidebar({ profile }: SidebarProps) {
                   </span>
                 </span>
                 {item.active ? <ChevronRight className="h-4 w-4" aria-hidden="true" /> : null}
-              </button>
+              </Link>
             );
           })}
         </nav>

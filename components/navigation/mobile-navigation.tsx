@@ -1,6 +1,7 @@
 "use client";
 
 import { Menu, X } from "lucide-react";
+import Link from "next/link";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -39,16 +40,16 @@ export function MobileNavigation({ profile }: MobileNavigationProps) {
                 const Icon = item.icon;
 
                 return (
-                  <button
+                  <Link
                     aria-disabled={item.disabled}
                     className={cn(
                       "flex w-full items-center gap-3 rounded-lg px-3 py-3 text-left",
                       item.active ? "bg-primary text-primary-foreground" : "bg-background text-muted-foreground",
                       item.disabled && "cursor-not-allowed opacity-65",
                     )}
+                    href={item.disabled || !item.href ? "#" : item.href}
                     key={item.label}
                     onClick={() => setOpen(false)}
-                    type="button"
                   >
                     <Icon className="h-4 w-4" aria-hidden="true" />
                     <span>
@@ -57,7 +58,7 @@ export function MobileNavigation({ profile }: MobileNavigationProps) {
                         {item.description}
                       </span>
                     </span>
-                  </button>
+                  </Link>
                 );
               })}
             </nav>
