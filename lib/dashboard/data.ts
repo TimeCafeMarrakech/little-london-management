@@ -62,6 +62,7 @@ export const roleNavigation: Record<UserRole, NavigationItem[]> = {
   super_admin: [
     { label: "Overview", description: "Platform command centre", icon: Home, href: "/dashboard", active: true },
     { label: "Students", description: "Profiles and care notes", icon: Users, href: "/students" },
+    { label: "Parents", description: "Family contacts and links", icon: Heart, href: "/parents" },
     { label: "Operations", description: "Classes and attendance", icon: ClipboardCheck, disabled: true },
     { label: "Finance", description: "Revenue and balances", icon: WalletCards, disabled: true },
     { label: "Settings", description: "System and access", icon: ShieldCheck, disabled: true },
@@ -69,6 +70,7 @@ export const roleNavigation: Record<UserRole, NavigationItem[]> = {
   admin: [
     { label: "Overview", description: "Daily management snapshot", icon: Home, href: "/dashboard", active: true },
     { label: "Students", description: "Profiles and care notes", icon: GraduationCap, href: "/students" },
+    { label: "Parents", description: "Contacts and linked children", icon: Users, href: "/parents" },
     { label: "Attendance", description: "Daily attendance view", icon: ClipboardCheck, disabled: true },
     { label: "Finance", description: "Payments and invoices", icon: CreditCard, disabled: true },
     { label: "Announcements", description: "School communications", icon: Megaphone, disabled: true },
@@ -76,6 +78,7 @@ export const roleNavigation: Record<UserRole, NavigationItem[]> = {
   teacher: [
     { label: "Today", description: "Classes and tasks", icon: Home, href: "/dashboard", active: true },
     { label: "Students", description: "Assigned-only view", icon: Users, href: "/students" },
+    { label: "Parents", description: "Assigned contact placeholder", icon: Heart, href: "/parents" },
     { label: "Schedule", description: "Weekly teaching flow", icon: CalendarDays, disabled: true },
     { label: "Attendance", description: "Class check-in", icon: ClipboardCheck, disabled: true },
     { label: "Notes", description: "Lesson notes and remarks", icon: BookOpen, disabled: true },
