@@ -26,6 +26,7 @@ import type {
 } from "@/features/academic/types";
 import { hasAnyPermission, hasPermission, hasRole } from "@/lib/auth/permissions";
 import type { UserProfile } from "@/lib/auth/types";
+import { getClassAttendanceHistory } from "@/services/attendance/attendance-service";
 import { createSupabaseServerClient } from "@/supabase/server";
 
 type CourseRow = {
@@ -489,13 +490,14 @@ export async function getClassDetail(profile: UserProfile, classId: string): Pro
   }
 
   const row = data as ClassRow;
-  const [teacherCounts, enrolmentCounts, teachers, roster, availableTeachers, availableStudents] = await Promise.all([
+  const [teacherCounts, enrolmentCounts, teachers, roster, availableTeachers, availableStudents, attendanceSessions] = await Promise.all([
     getClassTeacherCounts([classId]),
     getClassEnrolmentCounts([classId]),
     getAssignedTeachers(classId),
     getClassRoster(classId),
     getAvailableTeachers(classId),
     getAvailableStudents(classId),
+    getClassAttendanceHistory(profile, classId),
   ]);
 
   return {
@@ -504,6 +506,15 @@ export async function getClassDetail(profile: UserProfile, classId: string): Pro
     roster,
     availableTeachers,
     availableStudents,
+    attendanceSessions: attendanceSessions.map((session) => ({
+      id: session.id,
+      sessionDate: session.sessionDate,
+      status: session.status,
+      presentCount: session.presentCount,
+      absentCount: session.absentCount,
+      lateCount: session.lateCount,
+      recordCount: session.recordCount,
+    })),
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };

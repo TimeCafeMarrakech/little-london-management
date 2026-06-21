@@ -61,6 +61,15 @@ export type ClassDetail = ClassListItem & {
   roster: RosterStudent[];
   availableTeachers: SelectOption[];
   availableStudents: SelectOption[];
+  attendanceSessions: {
+    id: string;
+    sessionDate: string;
+    status: string;
+    presentCount: number;
+    absentCount: number;
+    lateCount: number;
+    recordCount: number;
+  }[];
   createdAt: string;
   updatedAt: string;
 };

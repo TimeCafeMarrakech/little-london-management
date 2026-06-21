@@ -1,4 +1,4 @@
-import { AlertTriangle, CalendarDays, HeartPulse, Phone, Users } from "lucide-react";
+import { AlertTriangle, CalendarDays, ClipboardCheck, HeartPulse, Phone, Users } from "lucide-react";
 
 import type { StudentDetail } from "@/features/students/types";
 
@@ -33,6 +33,26 @@ export function StudentDetailSections({ student }: StudentDetailSectionsProps) {
             ))
           ) : (
             <EmptyLine>No parent relationship has been added yet.</EmptyLine>
+          )}
+        </div>
+      </section>
+
+      <section className="rounded-lg border bg-card p-5 shadow-soft">
+        <div className="flex items-center gap-3">
+          <ClipboardCheck className="h-5 w-5 text-primary" aria-hidden="true" />
+          <h2 className="text-lg font-semibold">Attendance history</h2>
+        </div>
+        <div className="mt-4 space-y-3">
+          {student.attendanceHistory.length > 0 ? (
+            student.attendanceHistory.map((item) => (
+              <article className="rounded-md bg-muted/45 p-4" key={item.id}>
+                <p className="font-semibold">{item.className}</p>
+                <p className="mt-1 text-sm text-muted-foreground">{item.classCode} - {item.sessionDate}</p>
+                <p className="mt-2 text-sm capitalize text-muted-foreground">{item.status} - session {item.sessionStatus}</p>
+              </article>
+            ))
+          ) : (
+            <EmptyLine>No attendance history recorded yet.</EmptyLine>
           )}
         </div>
       </section>

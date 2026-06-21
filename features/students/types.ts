@@ -86,6 +86,15 @@ export type StudentDetail = StudentListItem & {
   medicalProfile: MedicalProfileSummary | null;
   statusHistory: StudentStatusHistoryItem[];
   enrolments: StudentEnrolmentSummary[];
+  attendanceHistory: {
+    id: string;
+    classId: string;
+    className: string;
+    classCode: string;
+    sessionDate: string;
+    status: "present" | "absent" | "late" | "excused" | "sick";
+    sessionStatus: string;
+  }[];
   createdAt: string;
   updatedAt: string;
 };

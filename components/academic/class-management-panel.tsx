@@ -141,6 +141,32 @@ export function ClassManagementPanel({ classItem, canManage }: ClassManagementPa
         </div>
         <div className="mt-3"><ActionMessage state={removeEnrolState} /></div>
       </section>
+
+      <section className="rounded-lg border bg-card p-5 shadow-soft lg:col-span-2">
+        <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+          <div>
+            <h2 className="text-lg font-semibold">Attendance history</h2>
+            <p className="mt-1 text-sm text-muted-foreground">Recent attendance sessions for this class.</p>
+          </div>
+          <Button asChild size="sm" variant="outline"><Link href={`/attendance?classId=${classItem.id}`}>View all attendance</Link></Button>
+        </div>
+        <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+          {classItem.attendanceSessions.length > 0 ? classItem.attendanceSessions.map((session) => (
+            <article className="rounded-md bg-muted/45 p-4" key={session.id}>
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="font-semibold">{session.sessionDate}</p>
+                  <p className="mt-1 text-sm capitalize text-muted-foreground">{session.status}</p>
+                </div>
+                <Button asChild size="sm" variant="outline"><Link href={`/attendance/${session.id}`}>Open</Link></Button>
+              </div>
+              <p className="mt-3 text-sm text-muted-foreground">
+                {session.presentCount} present - {session.absentCount} absent - {session.lateCount} late
+              </p>
+            </article>
+          )) : <p className="rounded-md bg-muted/45 px-4 py-3 text-sm text-muted-foreground">No attendance sessions recorded yet.</p>}
+        </div>
+      </section>
     </div>
   );
 }
