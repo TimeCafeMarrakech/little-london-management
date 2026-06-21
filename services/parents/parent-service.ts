@@ -4,6 +4,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { hasAnyPermission, hasPermission, hasRole } from "@/lib/auth/permissions";
 import type { UserProfile } from "@/lib/auth/types";
 import { createSupabaseServerClient } from "@/supabase/server";
+import { getParentBillingSummary } from "@/services/finance/finance-service";
 import type {
   ParentFormInput,
   ParentListQuery,
@@ -257,7 +258,11 @@ export async function getParentDetail(profile: UserProfile, parentId: string): P
   }
 
   const row = data as ParentRow;
-  const [linkedStudents, availableStudents] = await Promise.all([getLinkedStudents(parentId), getAvailableStudentsForParent(parentId)]);
+  const [linkedStudents, availableStudents, billingSummary] = await Promise.all([
+    getLinkedStudents(parentId),
+    getAvailableStudentsForParent(parentId),
+    getParentBillingSummary(profile, parentId),
+  ]);
 
   return {
     ...toParentListItem(row, new Map([[parentId, linkedStudents.length]])),
@@ -266,6 +271,7 @@ export async function getParentDetail(profile: UserProfile, parentId: string): P
     country: row.country,
     linkedStudents,
     availableStudents,
+    billingSummary,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };

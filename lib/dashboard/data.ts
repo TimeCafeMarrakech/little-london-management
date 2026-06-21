@@ -69,7 +69,8 @@ export const roleNavigation: Record<UserRole, NavigationItem[]> = {
     { label: "Courses", description: "Program catalogue", icon: BookOpen, href: "/courses" },
     { label: "Classes", description: "Rosters and teachers", icon: Layers3, href: "/classes" },
     { label: "Attendance", description: "Daily attendance", icon: ClipboardCheck, href: "/attendance" },
-    { label: "Finance", description: "Revenue and balances", icon: WalletCards, disabled: true },
+    { label: "Invoices", description: "Billing and balances", icon: WalletCards, href: "/invoices" },
+    { label: "Payments", description: "Payment history", icon: CreditCard, href: "/payments" },
     { label: "Settings", description: "System and access", icon: ShieldCheck, disabled: true },
   ],
   admin: [
@@ -80,7 +81,8 @@ export const roleNavigation: Record<UserRole, NavigationItem[]> = {
     { label: "Courses", description: "Program catalogue", icon: BookOpen, href: "/courses" },
     { label: "Classes", description: "Rosters and teachers", icon: Layers3, href: "/classes" },
     { label: "Attendance", description: "Daily attendance view", icon: ClipboardCheck, href: "/attendance" },
-    { label: "Finance", description: "Payments and invoices", icon: CreditCard, disabled: true },
+    { label: "Invoices", description: "Billing and balances", icon: CreditCard, href: "/invoices" },
+    { label: "Payments", description: "Payment history", icon: WalletCards, href: "/payments" },
     { label: "Announcements", description: "School communications", icon: Megaphone, disabled: true },
   ],
   teacher: [

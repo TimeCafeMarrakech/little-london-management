@@ -6,6 +6,7 @@ import type { UserProfile } from "@/lib/auth/types";
 import { createSupabaseServerClient } from "@/supabase/server";
 import { getStudentEnrolments } from "@/services/academic/academic-service";
 import { getStudentAttendanceHistory } from "@/services/attendance/attendance-service";
+import { getStudentBillingSummary } from "@/services/finance/finance-service";
 import type {
   AllergySummary,
   EmergencyContactSummary,
@@ -252,7 +253,7 @@ export async function getStudentDetail(profile: UserProfile, studentId: string):
   }
 
   const row = data as StudentRow;
-  const [parents, emergencyContacts, allergies, medicalProfile, statusHistory, enrolments, attendanceHistory] = await Promise.all([
+  const [parents, emergencyContacts, allergies, medicalProfile, statusHistory, enrolments, attendanceHistory, billingSummary] = await Promise.all([
     getStudentParents(studentId),
     getStudentEmergencyContacts(studentId),
     getStudentAllergies(studentId),
@@ -260,6 +261,7 @@ export async function getStudentDetail(profile: UserProfile, studentId: string):
     getStudentStatusHistory(studentId),
     getStudentEnrolments(profile, studentId),
     getStudentAttendanceHistory(profile, studentId),
+    getStudentBillingSummary(profile, studentId),
   ]);
 
   return {
@@ -274,6 +276,7 @@ export async function getStudentDetail(profile: UserProfile, studentId: string):
     statusHistory,
     enrolments,
     attendanceHistory,
+    billingSummary,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };

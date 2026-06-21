@@ -95,6 +95,19 @@ export type StudentDetail = StudentListItem & {
     status: "present" | "absent" | "late" | "excused" | "sick";
     sessionStatus: string;
   }[];
+  billingSummary: {
+    invoiceCount: number;
+    paymentCount: number;
+    outstandingBalance: number;
+    paidTotal: number;
+    recentInvoices: Array<{
+      id: string;
+      invoiceNumber: string;
+      status: "draft" | "issued" | "partially_paid" | "paid" | "cancelled";
+      dueDate: string;
+      balanceDue: number;
+    }>;
+  } | null;
   createdAt: string;
   updatedAt: string;
 };

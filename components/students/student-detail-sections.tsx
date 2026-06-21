@@ -1,4 +1,8 @@
-import { AlertTriangle, CalendarDays, ClipboardCheck, HeartPulse, Phone, Users } from "lucide-react";
+import Link from "next/link";
+import { AlertTriangle, CalendarDays, ClipboardCheck, HeartPulse, Phone, ReceiptText, Users } from "lucide-react";
+import type { ReactNode } from "react";
+
+import { Button } from "@/components/ui/button";
 
 import type { StudentDetail } from "@/features/students/types";
 
@@ -6,8 +10,12 @@ type StudentDetailSectionsProps = {
   student: StudentDetail;
 };
 
-function EmptyLine({ children }: { children: string }) {
+function EmptyLine({ children }: { children: ReactNode }) {
   return <p className="rounded-md bg-muted/45 px-4 py-3 text-sm text-muted-foreground">{children}</p>;
+}
+
+function formatMoney(value: number): string {
+  return `${value.toLocaleString("en-GB", { maximumFractionDigits: 2, minimumFractionDigits: 2 })} MAD`;
 }
 
 export function StudentDetailSections({ student }: StudentDetailSectionsProps) {
@@ -33,6 +41,42 @@ export function StudentDetailSections({ student }: StudentDetailSectionsProps) {
             ))
           ) : (
             <EmptyLine>No parent relationship has been added yet.</EmptyLine>
+          )}
+        </div>
+      </section>
+
+      <section className="rounded-lg border bg-card p-5 shadow-soft">
+        <div className="flex items-center gap-3">
+          <ReceiptText className="h-5 w-5 text-primary" aria-hidden="true" />
+          <h2 className="text-lg font-semibold">Billing summary</h2>
+        </div>
+        <div className="mt-4 space-y-3">
+          {student.billingSummary ? (
+            <>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <EmptyLine>{student.billingSummary.invoiceCount} invoices</EmptyLine>
+                <EmptyLine>{student.billingSummary.paymentCount} payments</EmptyLine>
+                <EmptyLine>{formatMoney(student.billingSummary.outstandingBalance)} outstanding</EmptyLine>
+                <EmptyLine>{formatMoney(student.billingSummary.paidTotal)} paid</EmptyLine>
+              </div>
+              {student.billingSummary.recentInvoices.length > 0 ? (
+                <div className="space-y-2">
+                  {student.billingSummary.recentInvoices.map((invoice) => (
+                    <article className="flex flex-wrap items-center justify-between gap-3 rounded-md bg-muted/45 p-4" key={invoice.id}>
+                      <div>
+                        <p className="font-medium">{invoice.invoiceNumber}</p>
+                        <p className="text-sm capitalize text-muted-foreground">{invoice.status.replace("_", " ")} - due {invoice.dueDate}</p>
+                      </div>
+                      <Button asChild size="sm" variant="outline">
+                        <Link href={`/invoices/${invoice.id}`}>Open</Link>
+                      </Button>
+                    </article>
+                  ))}
+                </div>
+              ) : null}
+            </>
+          ) : (
+            <EmptyLine>Finance visibility is limited to management roles.</EmptyLine>
           )}
         </div>
       </section>

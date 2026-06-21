@@ -42,6 +42,19 @@ export type ParentDetail = ParentListItem & {
   country: string;
   linkedStudents: LinkedStudentSummary[];
   availableStudents: AvailableStudentOption[];
+  billingSummary: {
+    invoiceCount: number;
+    paymentCount: number;
+    outstandingBalance: number;
+    paidTotal: number;
+    recentInvoices: Array<{
+      id: string;
+      invoiceNumber: string;
+      status: "draft" | "issued" | "partially_paid" | "paid" | "cancelled";
+      dueDate: string;
+      balanceDue: number;
+    }>;
+  } | null;
   createdAt: string;
   updatedAt: string;
 };
