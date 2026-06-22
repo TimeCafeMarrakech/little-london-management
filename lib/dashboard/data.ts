@@ -71,6 +71,7 @@ export const roleNavigation: Record<UserRole, NavigationItem[]> = {
     { label: "Attendance", description: "Daily attendance", icon: ClipboardCheck, href: "/attendance" },
     { label: "Invoices", description: "Billing and balances", icon: WalletCards, href: "/invoices" },
     { label: "Payments", description: "Payment history", icon: CreditCard, href: "/payments" },
+    { label: "Events", description: "Workshops and camps", icon: CalendarDays, href: "/events" },
     { label: "Settings", description: "System and access", icon: ShieldCheck, disabled: true },
   ],
   admin: [
@@ -83,6 +84,7 @@ export const roleNavigation: Record<UserRole, NavigationItem[]> = {
     { label: "Attendance", description: "Daily attendance view", icon: ClipboardCheck, href: "/attendance" },
     { label: "Invoices", description: "Billing and balances", icon: CreditCard, href: "/invoices" },
     { label: "Payments", description: "Payment history", icon: WalletCards, href: "/payments" },
+    { label: "Events", description: "Workshops and camps", icon: CalendarDays, href: "/events" },
     { label: "Announcements", description: "School communications", icon: Megaphone, disabled: true },
   ],
   teacher: [
@@ -93,6 +95,7 @@ export const roleNavigation: Record<UserRole, NavigationItem[]> = {
     { label: "Classes", description: "Assigned class view", icon: Layers3, href: "/classes" },
     { label: "Schedule", description: "Weekly teaching flow later", icon: CalendarDays, disabled: true },
     { label: "Attendance", description: "Class check-in", icon: ClipboardCheck, href: "/attendance" },
+    { label: "Events", description: "Assigned activities", icon: CalendarDays, href: "/events" },
     { label: "Notes", description: "Lesson notes and remarks", icon: BookOpen, disabled: true },
     { label: "Announcements", description: "Staff updates", icon: Bell, disabled: true },
   ],
