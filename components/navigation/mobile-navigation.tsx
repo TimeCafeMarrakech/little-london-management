@@ -25,13 +25,13 @@ export function MobileNavigation({ profile }: MobileNavigationProps) {
 
       {open ? (
         <div className="fixed inset-0 z-50 bg-primary/20 backdrop-blur-sm" role="dialog" aria-modal="true">
-          <div className="flex h-full w-full max-w-sm flex-col overflow-hidden bg-card p-5 shadow-soft">
+          <div className="flex h-full w-full max-w-sm flex-col overflow-hidden bg-primary p-5 text-primary-foreground shadow-premium">
             <div className="flex shrink-0 items-center justify-between">
               <div>
-                <p className="text-sm font-semibold">Little London</p>
-                <p className="text-xs text-muted-foreground">{roleLabels[profile.role]}</p>
+                <p className="text-sm font-semibold tracking-wide">Little London</p>
+                <p className="text-xs text-primary-foreground/60">{roleLabels[profile.role]}</p>
               </div>
-              <Button aria-label="Close navigation" onClick={() => setOpen(false)} size="icon" type="button" variant="ghost">
+              <Button aria-label="Close navigation" className="text-primary-foreground hover:bg-accent/15 hover:text-accent" onClick={() => setOpen(false)} size="icon" type="button" variant="ghost">
                 <X className="h-4 w-4" aria-hidden="true" />
               </Button>
             </div>
@@ -44,7 +44,7 @@ export function MobileNavigation({ profile }: MobileNavigationProps) {
                     aria-disabled={item.disabled}
                     className={cn(
                       "flex w-full items-center gap-3 rounded-lg px-3 py-3 text-left",
-                      item.active ? "bg-primary text-primary-foreground" : "bg-background text-muted-foreground",
+                      item.active ? "border border-accent/30 bg-accent/15 text-primary-foreground" : "bg-white/10 text-primary-foreground/70 hover:text-accent",
                       item.disabled && "cursor-not-allowed opacity-65",
                     )}
                     href={item.disabled || !item.href ? "#" : item.href}
@@ -54,7 +54,7 @@ export function MobileNavigation({ profile }: MobileNavigationProps) {
                     <Icon className="h-4 w-4" aria-hidden="true" />
                     <span>
                       <span className="block text-sm font-semibold">{item.label}</span>
-                      <span className={cn("block text-xs", item.active ? "text-primary-foreground/75" : "text-muted-foreground")}>
+                      <span className={cn("block text-xs", item.active ? "text-primary-foreground/75" : "text-primary-foreground/50")}>
                         {item.description}
                       </span>
                     </span>

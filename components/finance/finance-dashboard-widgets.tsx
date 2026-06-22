@@ -26,13 +26,13 @@ export function FinanceDashboardWidgets({ metrics }: FinanceDashboardWidgetsProp
         const value = card.key === "outstandingInvoices" || card.key === "overdueInvoices" ? rawValue.toString() : formatMoney(rawValue);
 
         return (
-          <section className="rounded-lg border bg-card p-5 shadow-soft" key={card.key}>
+          <section className="ll-card-premium p-5" key={card.key}>
             <div className="flex items-center justify-between gap-4">
               <div>
-                <p className="text-sm text-muted-foreground">{card.label}</p>
-                <p className="mt-2 text-2xl font-semibold">{value}</p>
+                <p className="text-sm font-medium text-muted-foreground">{card.label}</p>
+                <p className="mt-2 text-2xl font-semibold tracking-tight">{value}</p>
               </div>
-              <span className="rounded-full bg-secondary/25 p-3">
+              <span className="rounded-full bg-secondary/25 p-3 shadow-inner-soft">
                 <Icon className={`h-5 w-5 ${card.tone}`} aria-hidden="true" />
               </span>
             </div>

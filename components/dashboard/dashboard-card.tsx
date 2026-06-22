@@ -8,5 +8,5 @@ type DashboardCardProps = {
 };
 
 export function DashboardCard({ children, className }: DashboardCardProps) {
-  return <section className={cn("rounded-lg border bg-card p-5 text-card-foreground shadow-soft", className)}>{children}</section>;
+  return <section className={cn("ll-card-premium p-6", className)}>{children}</section>;
 }

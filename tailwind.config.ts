@@ -55,7 +55,9 @@ const config: Config = {
         sans: ["Inter", "ui-sans-serif", "system-ui", "sans-serif"],
       },
       boxShadow: {
-        soft: "0 10px 30px rgba(22, 50, 79, 0.08)",
+        soft: "0 14px 38px rgba(15, 39, 71, 0.08)",
+        premium: "0 24px 70px rgba(15, 39, 71, 0.13)",
+        "inner-soft": "inset 0 1px 0 rgba(255, 255, 255, 0.58)",
       },
     },
   },

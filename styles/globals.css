@@ -3,24 +3,24 @@
 @tailwind utilities;
 
 :root {
-  --background: 210 40% 98%;
-  --foreground: 222 47% 11%;
-  --card: 0 0% 100%;
-  --card-foreground: 222 47% 11%;
-  --primary: 209 56% 20%;
+  --background: 40 30% 96%;
+  --foreground: 211 65% 17%;
+  --card: 42 38% 98%;
+  --card-foreground: 211 65% 17%;
+  --primary: 211 65% 17%;
   --primary-foreground: 210 40% 98%;
-  --secondary: 203 98% 74%;
-  --secondary-foreground: 209 56% 20%;
-  --accent: 33 87% 65%;
-  --accent-foreground: 209 56% 20%;
-  --muted: 214 32% 91%;
-  --muted-foreground: 220 9% 46%;
+  --secondary: 138 19% 71%;
+  --secondary-foreground: 211 65% 17%;
+  --accent: 41 57% 63%;
+  --accent-foreground: 211 65% 17%;
+  --muted: 207 47% 91%;
+  --muted-foreground: 213 23% 36%;
   --destructive: 0 84% 60%;
   --destructive-foreground: 210 40% 98%;
-  --border: 220 13% 91%;
-  --input: 220 13% 91%;
-  --ring: 209 56% 20%;
-  --radius: 0.75rem;
+  --border: 38 24% 86%;
+  --input: 38 24% 86%;
+  --ring: 41 57% 63%;
+  --radius: 1rem;
 }
 
 .dark {
@@ -53,11 +53,64 @@ html {
 
 body {
   min-height: 100%;
-  background: hsl(var(--background));
+  background:
+    radial-gradient(circle at top left, hsl(var(--muted) / 0.55), transparent 34rem),
+    radial-gradient(circle at top right, hsl(var(--secondary) / 0.22), transparent 30rem),
+    hsl(var(--background));
   color: hsl(var(--foreground));
   font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+  text-rendering: optimizeLegibility;
 }
 
 ::selection {
   background: hsl(var(--accent) / 0.35);
+}
+
+@layer base {
+  input,
+  select,
+  textarea {
+    border-color: hsl(var(--input));
+    background-color: hsl(var(--card) / 0.86);
+    color: hsl(var(--foreground));
+    box-shadow: 0 1px 0 hsl(var(--primary) / 0.03);
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    color: hsl(var(--muted-foreground) / 0.68);
+  }
+
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible {
+    border-color: hsl(var(--accent));
+    box-shadow: 0 0 0 3px hsl(var(--accent) / 0.2);
+  }
+}
+
+@layer components {
+  .ll-card {
+    @apply rounded-xl border bg-card/90 text-card-foreground shadow-soft backdrop-blur;
+  }
+
+  .ll-card-premium {
+    @apply rounded-xl border border-border/80 bg-card/95 text-card-foreground shadow-premium backdrop-blur;
+  }
+
+  .ll-page-section {
+    @apply rounded-xl border border-border/80 bg-card/90 p-5 shadow-soft backdrop-blur;
+  }
+
+  .ll-section-label {
+    @apply text-xs font-semibold uppercase tracking-[0.16em] text-accent;
+  }
+
+  .ll-form-panel {
+    @apply rounded-xl border border-border/80 bg-card/95 p-6 shadow-soft;
+  }
+
+  .ll-list-row {
+    @apply rounded-lg border border-border/70 bg-background/55 px-4 py-3 shadow-inner-soft;
+  }
 }

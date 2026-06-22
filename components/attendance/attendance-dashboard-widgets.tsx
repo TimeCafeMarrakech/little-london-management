@@ -21,13 +21,13 @@ export function AttendanceDashboardWidgets({ metrics }: AttendanceDashboardWidge
         const Icon = widget.icon;
 
         return (
-          <section className="rounded-lg border bg-card p-5 shadow-soft" key={widget.label}>
+          <section className="ll-card-premium p-5" key={widget.label}>
             <div className="flex items-center justify-between gap-4">
               <div>
-                <p className="text-sm text-muted-foreground">{widget.label}</p>
-                <p className="mt-2 text-3xl font-semibold">{widget.value}</p>
+                <p className="text-sm font-medium text-muted-foreground">{widget.label}</p>
+                <p className="mt-2 text-3xl font-semibold tracking-tight">{widget.value}</p>
               </div>
-              <div className="rounded-md bg-muted p-3">
+              <div className="rounded-lg bg-muted/75 p-3 shadow-inner-soft">
                 <Icon className={`h-5 w-5 ${widget.tone}`} aria-hidden="true" />
               </div>
             </div>

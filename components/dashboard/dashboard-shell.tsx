@@ -14,7 +14,7 @@ export function DashboardShell({ children, profile }: DashboardShellProps) {
     <div className="min-h-screen bg-background">
       <Sidebar profile={profile} />
       <Header profile={profile} />
-      <main className="px-4 py-6 lg:ml-72 lg:px-8">
+      <main className="px-4 py-8 lg:ml-72 lg:px-8">
         <div className="mx-auto max-w-7xl">{children}</div>
       </main>
     </div>
