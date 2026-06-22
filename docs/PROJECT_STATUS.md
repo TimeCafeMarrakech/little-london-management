@@ -4,7 +4,15 @@
 
 Project Status: In Active Development
 
-Current Approved Git Tag: `phase-9-approved`
+Current Approved Phase: 10
+
+Current Development Phase: 11
+
+UI Version: Premium Boutique Dashboard v1
+
+Status: UI redesign deployed and validated.
+
+Current Approved Git Tag: `phase-10-approved`
 
 ---
 
@@ -19,14 +27,15 @@ Current Approved Git Tag: `phase-9-approved`
 - Phase 7 - Courses, Classes & Enrolments - Approved
 - Phase 8 - Attendance Management - Approved
 - Phase 9 - Finance, Payments & Invoices - Approved
+- Phase 10 - Workshops, Holiday Camps & Events Management - Approved
 
 ---
 
 ## Current Phase
 
-Phase 10 - Workshops, Holiday Camps & Events Management
+Phase 11 - Parent Portal
 
-Phase 10 is the next planned implementation phase. No Phase 10 features are included in the approved Phase 1-9 build.
+Phase 11 is the current development phase. Phase 10 is approved.
 
 ---
 
@@ -50,7 +59,7 @@ Phase 10 is the next planned implementation phase. No Phase 10 features are incl
 
 ## Database Status
 
-Database implementation is complete through Phase 9.
+Database implementation is complete through Phase 10.
 
 Completed database areas include:
 
@@ -99,6 +108,14 @@ Completed database areas include:
   - concurrency-safe payment allocation
   - active parent-student relationship enforcement for finance records
 
+- Events, workshops, holiday camps & birthday events
+  - `event_types`
+  - `events`
+  - `event_bookings`
+  - `event_staff_assignments`
+  - capacity-protected event booking
+  - teacher event assignments
+
 All implemented Phase 1-9 tables have Row Level Security strategies aligned with the current MVP role model. Future branch-scoped RLS and Parent Portal finance visibility remain deferred.
 
 ---
@@ -138,4 +155,4 @@ All implemented Phase 1-9 tables have Row Level Security strategies aligned with
 
 ## Notes
 
-This document is a living milestone summary for the Little London Management System. It reflects the approved state after Phase 9 and should be updated after each reviewed and approved phase.
+This document is a living milestone summary for the Little London Management System. It reflects the approved state after Phase 10 and should be updated after each reviewed and approved phase.
