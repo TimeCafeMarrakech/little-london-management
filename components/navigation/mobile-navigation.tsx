@@ -25,8 +25,8 @@ export function MobileNavigation({ profile }: MobileNavigationProps) {
 
       {open ? (
         <div className="fixed inset-0 z-50 bg-primary/20 backdrop-blur-sm" role="dialog" aria-modal="true">
-          <div className="h-full w-full max-w-sm bg-card p-5 shadow-soft">
-            <div className="flex items-center justify-between">
+          <div className="flex h-full w-full max-w-sm flex-col overflow-hidden bg-card p-5 shadow-soft">
+            <div className="flex shrink-0 items-center justify-between">
               <div>
                 <p className="text-sm font-semibold">Little London</p>
                 <p className="text-xs text-muted-foreground">{roleLabels[profile.role]}</p>
@@ -35,7 +35,7 @@ export function MobileNavigation({ profile }: MobileNavigationProps) {
                 <X className="h-4 w-4" aria-hidden="true" />
               </Button>
             </div>
-            <nav className="mt-6 space-y-2" aria-label="Mobile navigation">
+            <nav className="mt-6 min-h-0 flex-1 space-y-2 overflow-y-auto pr-1" aria-label="Mobile navigation">
               {navigation.map((item) => {
                 const Icon = item.icon;
 

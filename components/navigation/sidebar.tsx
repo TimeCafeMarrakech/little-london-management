@@ -13,9 +13,9 @@ export function Sidebar({ profile }: SidebarProps) {
   const navigation = roleNavigation[profile.role];
 
   return (
-    <aside className="hidden min-h-screen w-72 border-r bg-card/80 px-5 py-6 shadow-soft backdrop-blur lg:fixed lg:inset-y-0 lg:left-0 lg:block">
-      <div className="flex h-full flex-col">
-        <div className="flex items-center gap-3 px-2">
+    <aside className="hidden h-screen max-h-screen w-72 overflow-hidden border-r bg-card/80 px-5 py-6 shadow-soft backdrop-blur lg:fixed lg:inset-y-0 lg:left-0 lg:block">
+      <div className="flex h-full min-h-0 flex-col">
+        <div className="flex shrink-0 items-center gap-3 px-2">
           <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-primary text-lg font-semibold text-primary-foreground">
             LL
           </div>
@@ -25,7 +25,7 @@ export function Sidebar({ profile }: SidebarProps) {
           </div>
         </div>
 
-        <nav className="mt-8 space-y-2" aria-label="Primary navigation">
+        <nav className="mt-8 min-h-0 flex-1 space-y-2 overflow-y-auto pr-1" aria-label="Primary navigation">
           {navigation.map((item) => {
             const Icon = item.icon;
 
@@ -60,7 +60,7 @@ export function Sidebar({ profile }: SidebarProps) {
           })}
         </nav>
 
-        <div className="mt-auto rounded-lg border bg-background p-4">
+        <div className="mt-6 shrink-0 rounded-lg border bg-background p-4">
           <p className="text-xs font-semibold uppercase tracking-[0.12em] text-accent">Phase 3</p>
           <p className="mt-2 text-sm font-medium">Dashboard framework only</p>
           <p className="mt-1 text-xs leading-5 text-muted-foreground">Operational modules unlock in later roadmap phases.</p>
