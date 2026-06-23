@@ -2,7 +2,7 @@ import type { UserRole } from "@/lib/auth/types";
 
 export const publicAuthRoutes = ["/login", "/forgot-password", "/reset-password", "/session-expired"] as const;
 
-export const protectedRoutePrefixes = ["/dashboard"] as const;
+export const protectedRoutePrefixes = ["/dashboard", "/portal"] as const;
 
 export function isProtectedPath(pathname: string): boolean {
   return protectedRoutePrefixes.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`));

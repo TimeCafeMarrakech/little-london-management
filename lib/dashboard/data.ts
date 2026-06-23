@@ -102,11 +102,13 @@ export const roleNavigation: Record<UserRole, NavigationItem[]> = {
     { label: "Announcements", description: "Staff updates", icon: Bell, disabled: true },
   ],
   parent: [
-    { label: "Family", description: "Children overview", icon: Heart, href: "/dashboard", active: true },
-    { label: "Schedule", description: "Upcoming classes", icon: CalendarDays, disabled: true },
-    { label: "Progress", description: "Teacher updates", icon: Star, disabled: true },
-    { label: "Payments", description: "Invoices and receipts", icon: CreditCard, disabled: true },
-    { label: "Announcements", description: "School messages", icon: Megaphone, disabled: true },
+    { label: "Dashboard", description: "Family overview", icon: Home, href: "/dashboard", active: true },
+    { label: "My Children", description: "Child profiles", icon: Heart, href: "/portal/children" },
+    { label: "Classes", description: "Enrolments and teachers", icon: CalendarDays, href: "/portal/classes" },
+    { label: "Attendance", description: "Attendance history", icon: ClipboardCheck, href: "/portal/attendance" },
+    { label: "Finance", description: "Invoices and payments", icon: CreditCard, href: "/portal/finance" },
+    { label: "Event Bookings", description: "Booked activities", icon: Star, href: "/portal/events" },
+    { label: "Upcoming Events", description: "Future activities", icon: Sparkles, href: "/portal/upcoming-events" },
   ],
 };
 
