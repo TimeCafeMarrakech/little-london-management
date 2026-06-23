@@ -1,4 +1,14 @@
-import { ArrowRight, CalendarDays, ClipboardCheck, Sparkles, UserRoundCheck, WalletCards } from "lucide-react";
+import {
+  ArrowRight,
+  BarChart3,
+  CalendarDays,
+  ClipboardCheck,
+  FilePlus2,
+  GraduationCap,
+  Sparkles,
+  UserPlus,
+  WalletCards,
+} from "lucide-react";
 
 import { DashboardCard } from "@/components/dashboard/dashboard-card";
 import { NotificationArea } from "@/components/dashboard/notification-area";
@@ -16,8 +26,7 @@ const heroPulse = [
   { label: "Today's classes", value: "12", helper: "Across English, drama, and early years", icon: CalendarDays },
   { label: "Today's attendance", value: "94%", helper: "Calm check-ins in progress", icon: ClipboardCheck },
   { label: "Outstanding invoices", value: "18", helper: "Awaiting parent follow-up", icon: WalletCards },
-  { label: "Upcoming workshops", value: "6", helper: "Holiday and weekend sessions", icon: Sparkles },
-  { label: "Staff availability", value: "Healthy", helper: "No coverage gaps flagged", icon: UserRoundCheck },
+  { label: "Upcoming events", value: "6", helper: "Holiday and weekend sessions", icon: Sparkles },
 ];
 
 const dashboardSections = [
@@ -53,6 +62,67 @@ const chartBars = [
   { label: "Finance", value: "68%", className: "bg-accent" },
 ];
 
+const analyticsWidgets = [
+  {
+    label: "Attendance trend",
+    value: "94%",
+    helper: "Strong completion across today's sessions",
+    points: [82, 84, 87, 86, 90, 92, 94],
+    color: "stroke-primary",
+    icon: ClipboardCheck,
+  },
+  {
+    label: "Enrolment trend",
+    value: "+24",
+    helper: "New enrolments this month",
+    points: [18, 19, 20, 21, 22, 23, 24],
+    color: "stroke-secondary",
+    icon: GraduationCap,
+  },
+  {
+    label: "Revenue trend",
+    value: "86k MAD",
+    helper: "Revenue pacing above last month",
+    points: [42, 45, 47, 54, 58, 63, 69],
+    color: "stroke-accent",
+    icon: BarChart3,
+  },
+];
+
+const upcomingEvents = [
+  { title: "Spring Drama Workshop", meta: "Tomorrow, 10:00", capacity: "18/24" },
+  { title: "Holiday Camp Preview", meta: "Fri, 14:30", capacity: "21/28" },
+  { title: "Birthday Party Booking", meta: "Sat, 12:00", capacity: "12/16" },
+];
+
+const outstandingInvoices = [
+  { family: "Benali family", amount: "2,400 MAD", status: "Due this week" },
+  { family: "Haddad family", amount: "1,800 MAD", status: "Reminder ready" },
+  { family: "Martin family", amount: "950 MAD", status: "Partially paid" },
+];
+
+const quickActions = [
+  { label: "Add Student", helper: "Prepare a new child profile", icon: UserPlus },
+  { label: "Create Invoice", helper: "Start a billing draft", icon: FilePlus2 },
+  { label: "Mark Attendance", helper: "Open today's attendance flow", icon: ClipboardCheck },
+  { label: "Create Event", helper: "Plan a workshop or camp", icon: CalendarDays },
+];
+
+function trendPoints(values: number[]): string {
+  const max = Math.max(...values);
+  const min = Math.min(...values);
+  const range = max - min || 1;
+
+  return values
+    .map((value, index) => {
+      const x = (index / (values.length - 1 || 1)) * 160;
+      const y = 56 - ((value - min) / range) * 44;
+
+      return `${x.toFixed(1)},${y.toFixed(1)}`;
+    })
+    .join(" ");
+}
+
 export function DashboardContent({ profile }: DashboardContentProps) {
   const experience = dashboardExperiences[profile.role];
   const notifications = notificationItems[profile.role];
@@ -77,12 +147,12 @@ export function DashboardContent({ profile }: DashboardContentProps) {
                 );
               })}
             </div>
-            <p className="text-sm font-medium text-accent">Welcome back, Noura 🌿</p>
+            <p className="text-sm font-medium text-accent">Welcome back, Noura</p>
             <h1 className="mt-2 max-w-3xl text-4xl font-semibold tracking-tight text-primary-foreground md:text-5xl">
               Little London Operations Centre
             </h1>
             <p className="mt-4 max-w-2xl text-base leading-7 text-primary-foreground/75">{experience.subtitle}</p>
-            <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+            <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
               {heroPulse.map((item) => {
                 const Icon = item.icon;
 
@@ -139,6 +209,22 @@ export function DashboardContent({ profile }: DashboardContentProps) {
           </div>
         </DashboardCard>
 
+        <DashboardCard>
+          <p className="ll-section-label">Upcoming events</p>
+          <h2 className="mt-2 text-xl font-semibold tracking-tight">Workshops and special bookings</h2>
+          <div className="mt-5 space-y-3">
+            {upcomingEvents.map((event) => (
+              <div className="ll-list-row flex items-center justify-between gap-4 text-sm" key={event.title}>
+                <div>
+                  <p className="font-semibold text-foreground">{event.title}</p>
+                  <p className="mt-1 text-xs text-muted-foreground">{event.meta}</p>
+                </div>
+                <span className="rounded-full bg-accent/15 px-3 py-1 text-xs font-semibold text-primary">{event.capacity}</span>
+              </div>
+            ))}
+          </div>
+        </DashboardCard>
+
         {experience.panels.map((panel) => (
           <DashboardCard key={panel.title}>
             <p className="ll-section-label">{panel.eyebrow}</p>
@@ -155,22 +241,97 @@ export function DashboardContent({ profile }: DashboardContentProps) {
         ))}
       </section>
 
+      <section className="grid gap-5 xl:grid-cols-3" aria-label="Analytics widgets">
+        {analyticsWidgets.map((widget) => {
+          const Icon = widget.icon;
+
+          return (
+            <DashboardCard key={widget.label}>
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <p className="ll-section-label">{widget.label}</p>
+                  <h2 className="mt-2 text-2xl font-semibold tracking-tight">{widget.value}</h2>
+                  <p className="mt-2 text-sm leading-6 text-muted-foreground">{widget.helper}</p>
+                </div>
+                <span className="rounded-xl bg-muted/75 p-3 text-primary shadow-inner-soft">
+                  <Icon className="h-5 w-5" aria-hidden="true" />
+                </span>
+              </div>
+              <svg className="mt-6 h-24 w-full" viewBox="0 0 160 64" preserveAspectRatio="none" role="img" aria-label={`${widget.label} chart`}>
+                <polyline
+                  className={cn("fill-none stroke-[4]", widget.color)}
+                  points={trendPoints(widget.points)}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  vectorEffect="non-scaling-stroke"
+                />
+              </svg>
+            </DashboardCard>
+          );
+        })}
+      </section>
+
+      <section className="grid gap-5 lg:grid-cols-[0.9fr_1.1fr]">
+        <DashboardCard>
+          <p className="ll-section-label">Outstanding invoices</p>
+          <h2 className="mt-2 text-xl font-semibold tracking-tight">Finance follow-up</h2>
+          <div className="mt-5 space-y-3">
+            {outstandingInvoices.map((invoice) => (
+              <div className="ll-list-row flex items-center justify-between gap-4 text-sm" key={invoice.family}>
+                <div>
+                  <p className="font-semibold text-foreground">{invoice.family}</p>
+                  <p className="mt-1 text-xs text-muted-foreground">{invoice.status}</p>
+                </div>
+                <span className="text-sm font-semibold text-primary">{invoice.amount}</span>
+              </div>
+            ))}
+          </div>
+        </DashboardCard>
+
+        <DashboardCard>
+          <p className="ll-section-label">Operational alerts</p>
+          <h2 className="mt-2 text-xl font-semibold tracking-tight">What needs calm attention</h2>
+          <div className="mt-5 grid gap-3 md:grid-cols-3">
+            {[
+              { label: "Attendance", value: "2 sessions pending", tone: "bg-secondary/25" },
+              { label: "Finance", value: "6 invoices due soon", tone: "bg-accent/20" },
+              { label: "Events", value: "1 event near capacity", tone: "bg-muted" },
+            ].map((alert) => (
+              <div className={cn("rounded-xl border border-border/70 p-4 shadow-inner-soft", alert.tone)} key={alert.label}>
+                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-primary">{alert.label}</p>
+                <p className="mt-3 text-sm leading-6 text-muted-foreground">{alert.value}</p>
+              </div>
+            ))}
+          </div>
+        </DashboardCard>
+      </section>
+
       <DashboardCard>
-        <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+        <div className="flex flex-col gap-5">
           <div>
             <p className="ll-section-label">Quick actions</p>
-            <h2 className="mt-2 text-xl font-semibold tracking-tight">Prepared for future modules</h2>
+            <h2 className="mt-2 text-xl font-semibold tracking-tight">Frequent operations</h2>
             <p className="mt-2 text-sm leading-6 text-muted-foreground">
-              These are non-functional placeholders so Phase 3 can show workflow shape without building later modules.
+              Presentation-only action cards for the core operations team.
             </p>
           </div>
-          <div className="flex flex-wrap gap-3">
-            {experience.quickActions.map((action) => (
-              <Button key={action} type="button" variant="outline">
-                {action}
-                <ArrowRight className="h-4 w-4" aria-hidden="true" />
-              </Button>
-            ))}
+          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+            {quickActions.map((action) => {
+              const Icon = action.icon;
+
+              return (
+                <Button className="h-auto justify-start p-4 text-left" key={action.label} type="button" variant="outline">
+                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-accent/15 text-primary">
+                    <Icon className="h-5 w-5" aria-hidden="true" />
+                  </span>
+                  <span className="min-w-0">
+                    <span className="block text-sm font-semibold">{action.label}</span>
+                    <span className="mt-1 block whitespace-normal text-xs font-medium text-muted-foreground">{action.helper}</span>
+                  </span>
+                  <ArrowRight className="ml-auto h-4 w-4 shrink-0" aria-hidden="true" />
+                </Button>
+              );
+            })}
           </div>
         </div>
       </DashboardCard>

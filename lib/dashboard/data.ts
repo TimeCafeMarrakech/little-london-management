@@ -36,6 +36,8 @@ export type DashboardStat = {
   value: string;
   helper: string;
   tone: "navy" | "sky" | "orange" | "neutral";
+  trend: number[];
+  trendLabel: string;
 };
 
 export type DashboardPanel = {
@@ -114,10 +116,10 @@ export const dashboardExperiences: Record<UserRole, DashboardExperience> = {
     subtitle: "A calm view of Little London's full operating rhythm.",
     focus: "Cross-school health, access readiness, and growth signals.",
     stats: [
-      { label: "Monthly revenue", value: "142k MAD", helper: "+12% placeholder trend", tone: "navy" },
-      { label: "Active enrolments", value: "286", helper: "Across core programmes", tone: "sky" },
-      { label: "Attendance today", value: "94%", helper: "All sessions placeholder", tone: "orange" },
-      { label: "Staff workload", value: "Balanced", helper: "No teacher overloaded", tone: "neutral" },
+      { label: "Revenue", value: "142k MAD", helper: "+12% month on month", tone: "navy", trend: [42, 48, 45, 56, 62, 68, 74], trendLabel: "Rising steadily" },
+      { label: "Enrolments", value: "286", helper: "Across core programmes", tone: "sky", trend: [54, 58, 57, 63, 66, 70, 73], trendLabel: "Healthy demand" },
+      { label: "Attendance", value: "94%", helper: "All sessions today", tone: "orange", trend: [82, 84, 88, 86, 91, 93, 94], trendLabel: "Above target" },
+      { label: "Event bookings", value: "67", helper: "Workshops and camps", tone: "neutral", trend: [28, 34, 39, 43, 51, 59, 67], trendLabel: "Growing interest" },
     ],
     panels: [
       {
@@ -138,10 +140,10 @@ export const dashboardExperiences: Record<UserRole, DashboardExperience> = {
     subtitle: "A boutique command centre for daily school operations.",
     focus: "Revenue, enrolments, attendance, and teacher workload at a glance.",
     stats: [
-      { label: "Revenue this month", value: "86k MAD", helper: "Placeholder finance snapshot", tone: "navy" },
-      { label: "New enrolments", value: "24", helper: "Awaiting future registration module", tone: "sky" },
-      { label: "Attendance", value: "91%", helper: "Today's placeholder average", tone: "orange" },
-      { label: "Teacher load", value: "8 / 10", helper: "Capacity looks comfortable", tone: "neutral" },
+      { label: "Revenue", value: "86k MAD", helper: "This month's finance snapshot", tone: "navy", trend: [34, 38, 44, 49, 52, 61, 66], trendLabel: "Tracking upward" },
+      { label: "Enrolments", value: "24", helper: "New families this month", tone: "sky", trend: [8, 10, 13, 15, 17, 21, 24], trendLabel: "Strong pipeline" },
+      { label: "Attendance", value: "91%", helper: "Today's school average", tone: "orange", trend: [78, 82, 81, 86, 88, 90, 91], trendLabel: "Stable day" },
+      { label: "Event bookings", value: "31", helper: "Workshops and camps", tone: "neutral", trend: [11, 14, 18, 18, 24, 27, 31], trendLabel: "Near capacity soon" },
     ],
     panels: [
       {
@@ -162,10 +164,10 @@ export const dashboardExperiences: Record<UserRole, DashboardExperience> = {
     subtitle: "A focused workspace for today's teaching flow.",
     focus: "Classes, attendance, notes, and tasks without distractions.",
     stats: [
-      { label: "Today's classes", value: "4", helper: "Next class at 10:30", tone: "navy" },
-      { label: "Students today", value: "38", helper: "Across assigned sessions", tone: "sky" },
-      { label: "Attendance tasks", value: "2", helper: "Placeholder reminders", tone: "orange" },
-      { label: "Lesson notes", value: "3", helper: "Drafts to finish later", tone: "neutral" },
+      { label: "Today's classes", value: "4", helper: "Next class at 10:30", tone: "navy", trend: [2, 3, 3, 4, 4, 4, 4], trendLabel: "Balanced day" },
+      { label: "Enrolments", value: "38", helper: "Assigned students today", tone: "sky", trend: [30, 32, 34, 36, 37, 38, 38], trendLabel: "Class load steady" },
+      { label: "Attendance", value: "92%", helper: "Assigned sessions", tone: "orange", trend: [84, 85, 88, 90, 91, 91, 92], trendLabel: "On track" },
+      { label: "Event bookings", value: "8", helper: "Assigned activities", tone: "neutral", trend: [2, 3, 3, 5, 6, 7, 8], trendLabel: "Upcoming support" },
     ],
     panels: [
       {
@@ -186,10 +188,10 @@ export const dashboardExperiences: Record<UserRole, DashboardExperience> = {
     subtitle: "A simple, warm overview of your child's Little London day.",
     focus: "Child information, upcoming classes, announcements, and payment clarity.",
     stats: [
-      { label: "Next class", value: "Wed 16:00", helper: "English confidence group", tone: "navy" },
-      { label: "Attendance", value: "96%", helper: "Placeholder monthly view", tone: "sky" },
-      { label: "Announcements", value: "2", helper: "New school updates", tone: "orange" },
-      { label: "Balance", value: "0 MAD", helper: "No outstanding placeholder", tone: "neutral" },
+      { label: "Next class", value: "Wed 16:00", helper: "English confidence group", tone: "navy", trend: [1, 1, 1, 1, 1, 1, 1], trendLabel: "Confirmed" },
+      { label: "Attendance", value: "96%", helper: "Monthly view", tone: "sky", trend: [88, 90, 91, 92, 94, 96, 96], trendLabel: "Excellent rhythm" },
+      { label: "Announcements", value: "2", helper: "New school updates", tone: "orange", trend: [0, 1, 1, 1, 2, 2, 2], trendLabel: "Fresh updates" },
+      { label: "Balance", value: "0 MAD", helper: "No outstanding amount", tone: "neutral", trend: [4, 3, 2, 1, 0, 0, 0], trendLabel: "Clear" },
     ],
     panels: [
       {
