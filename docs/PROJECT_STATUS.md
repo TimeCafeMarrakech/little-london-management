@@ -4,9 +4,9 @@
 
 Project Status: In Active Development
 
-Current Approved Phase: 10
+Current Approved Phase: 11
 
-Current Development Phase: 11
+Current Development Phase: 12
 
 UI Version: Premium Boutique Dashboard v2
 
@@ -29,14 +29,15 @@ Current Approved Git Tag: `phase-10-approved`
 - Phase 9 - Finance, Payments & Invoices - Approved
 - Phase 10 - Workshops, Holiday Camps & Events Management - Approved
 - Phase 10 UI Enhancement - Approved
+- Phase 11 - Parent Portal MVP - Approved
 
 ---
 
 ## Current Phase
 
-Phase 11 - Parent Portal
+Phase 12
 
-Phase 11 is the current development phase. Phase 10 is approved.
+Phase 12 is the current development phase. Phase 11 is approved.
 
 ---
 
@@ -60,7 +61,7 @@ Phase 11 is the current development phase. Phase 10 is approved.
 
 ## Database Status
 
-Database implementation is complete through Phase 10.
+Database implementation is complete through Phase 11.
 
 Completed database areas include:
 
@@ -117,13 +118,19 @@ Completed database areas include:
   - capacity-protected event booking
   - teacher event assignments
 
-All implemented Phase 1-10 tables have Row Level Security strategies aligned with the current MVP role model. Future branch-scoped RLS and Parent Portal finance visibility remain deferred.
+- Parent Portal
+  - `parent_portal_*` secure views
+  - parent-scoped helper functions
+  - parent-safe RLS access
+  - read-only family dashboard
+  - children, classes, attendance, finance and events visibility
+
+All implemented Phase 1-10 tables have Row Level Security strategies aligned with the current MVP role model. Future branch-scoped RLS remains deferred.
 
 ---
 
 ## Future Planned Phases
 
-- Parent Portal
 - Reports & Analytics
 - Documents & File Storage
 - Notifications & Communications
@@ -138,8 +145,6 @@ All implemented Phase 1-10 tables have Row Level Security strategies aligned wit
 
 - Shared `audit_logs` implementation
 - Branch-scoped RLS
-- Parent Portal finance visibility
-- Parent Portal attendance visibility
 - Generated Supabase types
 - Advanced reporting
 
@@ -159,4 +164,19 @@ Premium Boutique Dashboard v2 was completed after Phase 10 approval.
 
 The enhancement added analytics widgets, KPI trend cards, attendance trends, revenue trends, enrolment trends, quick actions, and operational dashboard improvements without changing database schema, permissions, business logic, routes, or workflows.
 
-This document is a living milestone summary for the Little London Management System. It reflects the approved state after Phase 10 and should be updated after each reviewed and approved phase.
+Phase 11 Parent Portal MVP was completed, reviewed, security-fixed, approved, and locally validated.
+
+Parent users can securely view:
+
+- My Children
+- Classes & Enrolments
+- Attendance History
+- Finance
+- Event Bookings
+- Upcoming Events
+
+The portal is intentionally read-only in this phase and uses parent-safe views instead of direct access to sensitive tables.
+
+This document reflects the approved state after Phase 11.
+
+This document is a living milestone summary for the Little London Management System and should be updated after each reviewed and approved phase.
