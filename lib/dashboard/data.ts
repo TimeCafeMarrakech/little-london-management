@@ -1,4 +1,5 @@
 import {
+  BarChart3,
   Bell,
   BookOpen,
   CalendarDays,
@@ -74,6 +75,7 @@ export const roleNavigation: Record<UserRole, NavigationItem[]> = {
     { label: "Invoices", description: "Billing and balances", icon: WalletCards, href: "/invoices" },
     { label: "Payments", description: "Payment history", icon: CreditCard, href: "/payments" },
     { label: "Events", description: "Workshops and camps", icon: CalendarDays, href: "/events" },
+    { label: "Reports", description: "Insights and analytics", icon: BarChart3, href: "/reports" },
     { label: "Settings", description: "System and access", icon: ShieldCheck, disabled: true },
   ],
   admin: [
@@ -87,6 +89,7 @@ export const roleNavigation: Record<UserRole, NavigationItem[]> = {
     { label: "Invoices", description: "Billing and balances", icon: CreditCard, href: "/invoices" },
     { label: "Payments", description: "Payment history", icon: WalletCards, href: "/payments" },
     { label: "Events", description: "Workshops and camps", icon: CalendarDays, href: "/events" },
+    { label: "Reports", description: "Insights and analytics", icon: BarChart3, href: "/reports" },
     { label: "Announcements", description: "School communications", icon: Megaphone, disabled: true },
   ],
   teacher: [
