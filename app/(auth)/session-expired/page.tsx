@@ -1,24 +1,27 @@
 import Link from "next/link";
 
+import { PlayLearnAuthCard, PlayLearnAuthShell, SupportFooter } from "@/components/auth/play-learn-auth";
 import { Button } from "@/components/ui/button";
 
 export default function SessionExpiredPage() {
   return (
-    <section className="flex min-h-screen items-center justify-center bg-background px-6 py-12">
-      <div className="w-full max-w-md rounded-lg border bg-card p-8 text-center text-card-foreground shadow-soft">
-        <h1 className="text-3xl font-semibold tracking-normal">Session expired</h1>
-        <p className="mt-4 text-sm leading-6 text-muted-foreground">
-          Your session or password reset link is no longer valid. Please log in again or request a new reset link.
-        </p>
+    <PlayLearnAuthShell compact>
+      <PlayLearnAuthCard
+        eyebrow="Session notice"
+        title="Session expired"
+        subtitle="Your session or password reset link is no longer valid. Please log in again or request a new reset link."
+        centered
+      >
         <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
-          <Button asChild>
+          <Button asChild className="bg-[#EF4B37] text-white shadow-[0_18px_35px_rgba(239,75,55,0.24)] hover:bg-[#DC3F2F]">
             <Link href="/login">Back to login</Link>
           </Button>
-          <Button asChild variant="outline">
+          <Button asChild className="border-[#D9E1E8] bg-white/75 text-[#17324A] hover:bg-[#FFF8EB]" variant="outline">
             <Link href="/forgot-password">Reset password</Link>
           </Button>
         </div>
-      </div>
-    </section>
+        <SupportFooter />
+      </PlayLearnAuthCard>
+    </PlayLearnAuthShell>
   );
 }
