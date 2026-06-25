@@ -4,15 +4,16 @@
 
 Project Status: In Active Development
 
-Current Approved Phase: 11
+Current Approved Phase: 12
 
-Current Development Phase: 12
+Current Development Phase: 13
 
-UI Version: Premium Boutique Dashboard v2
+UI Version: Premium Boutique Dashboard v3
 
-Status: Premium Dashboard v2 approved and deployed.
+Status: Phase 12 (Reports & Analytics) has been reviewed, security-fixed, approved, and merged.
+Premium Login Experience has been completed and approved.
 
-Current Approved Git Tag: `phase-10-approved`
+Current Approved Git Tag: `phase-12-approved`
 
 ---
 
@@ -27,17 +28,18 @@ Current Approved Git Tag: `phase-10-approved`
 - Phase 7 - Courses, Classes & Enrolments - Approved
 - Phase 8 - Attendance Management - Approved
 - Phase 9 - Finance, Payments & Invoices - Approved
-- Phase 10 - Workshops, Holiday Camps & Events Management - Approved
+- Phase 10 - Workshops, Holiday Camps & Events - Approved
 - Phase 10 UI Enhancement - Approved
 - Phase 11 - Parent Portal MVP - Approved
+- Phase 12 - Reports & Analytics - Approved
 
 ---
 
 ## Current Phase
 
-Phase 12
+Phase 13
 
-Phase 12 is the current development phase. Phase 11 is approved.
+Documents & File Management
 
 ---
 
@@ -56,12 +58,113 @@ Phase 12 is the current development phase. Phase 11 is approved.
 - Finance
 - Payments
 - Invoices
+- Reports & Analytics
+- Parent Portal
+
+---
+
+## Supported Payment Methods
+
+### Current
+
+- Cash
+- Bank Transfer
+- Cheque
+
+### Future
+
+- Online Payments (Deferred)
+
+### Business Notes
+
+The Little London Management System is designed around the Moroccan education sector, where the primary payment methods are cash, bank transfer, and cheque. Future online payment gateways may be introduced but are intentionally outside the current project scope.
+
+---
+
+## Authentication UI
+
+Completed
+
+- Login
+- Forgot Password
+- Reset Password
+- Session Expired
+- Access Denied
+
+All authentication pages now share the Premium Play & Learn design language.
+
+Features include:
+
+- Premium boutique UI
+- Responsive desktop/mobile layouts
+- Improved accessibility
+- Modern input styling
+- Consistent branding
+- Premium iconography
+- Disabled visual OAuth placeholders (Google, Microsoft, Apple)
+- Authentication logic unchanged
+
+---
+
+## Design System
+
+Premium Boutique Dashboard v3
+
+### Design Philosophy
+
+The Little London Management System follows a Premium Boutique Dashboard v3 design language.
+
+The goal is to provide a premium SaaS experience inspired by boutique international schools while remaining warm, child-centred, and welcoming for administrators, teachers, and parents.
+
+### Design Principles
+
+- Premium
+- Boutique
+- Child-Centred
+- British-Inspired
+- Calm & Professional
+- Clean & Modern
+- Accessibility First
+- Consistent User Experience
+
+### Primary Colour Palette
+
+- Coral
+- Sage Green
+- Warm Cream
+- Navy
+- Warm Yellow
+
+### Typography
+
+- Clear heading hierarchy
+- Premium modern sans-serif
+- Accessible font sizes
+- Consistent spacing
+
+### Component Standards
+
+- Rounded cards
+- Soft shadows
+- Premium buttons
+- Modern form inputs
+- Responsive layouts
+- SVG iconography
+- Consistent spacing system
+- Accessible colour contrast
+- Smooth micro-interactions
+
+### Design Goal
+
+Every new page, component, dashboard, portal, and future module must follow the Premium Boutique Dashboard v3 design language to ensure a consistent experience across the entire Little London Management System.
 
 ---
 
 ## Database Status
 
-Database implementation is complete through Phase 11.
+Database implementation is complete through Phase 12.
+
+Reports & Analytics reporting views have been security hardened using management-only permission checks.
 
 Completed database areas include:
 
@@ -125,19 +228,58 @@ Completed database areas include:
   - read-only family dashboard
   - children, classes, attendance, finance and events visibility
 
-All implemented Phase 1-10 tables have Row Level Security strategies aligned with the current MVP role model. Future branch-scoped RLS remains deferred.
+- Reports & Analytics
+  - `report_attendance_summary_view`
+  - `report_attendance_by_student_view`
+  - `report_attendance_by_class_view`
+  - `report_invoice_balances_view`
+  - `report_payment_summary_view`
+  - `report_enrolment_summary_view`
+  - `report_class_capacity_view`
+  - `report_event_booking_summary_view`
+  - `report_event_capacity_view`
+  - `report_management_kpis_view`
+  - management-only reporting permission checks
+
+All implemented Phase 1-12 tables have Row Level Security strategies aligned with the current MVP role model. Future branch-scoped RLS remains deferred.
+
+---
+
+## Current Development Focus
+
+The immediate priority is to continue evolving the Little London Management System into a fully unified Premium Boutique Dashboard v3 experience.
+
+Before introducing major new functionality, the focus is on refining the existing management modules to ensure a consistent, premium user experience across the platform.
+
+Current priorities include:
+
+- Upgrade existing modules to the Premium Boutique Dashboard v3 design language
+- Maintain consistent branding across all pages
+- Improve responsive layouts for desktop, tablet, and mobile
+- Standardise cards, forms, tables, buttons, charts, and navigation
+- Improve accessibility and usability
+- Enhance loading states, empty states, and user feedback
+- Maintain a shared component library
+- Continue following the established Design System
+
+The completed Premium Login Experience is now the official UI benchmark for the Little London Management System.
+
+Every future page and module should follow this design language to ensure a consistent, premium experience for administrators, teachers, and parents.
+
+Once the Premium Boutique Dashboard v3 refinement has been completed across the existing application, development will continue with:
+
+Phase 13 - Documents & File Management.
 
 ---
 
 ## Future Planned Phases
 
-- Reports & Analytics
-- Documents & File Storage
-- Notifications & Communications
-- Multi-Branch Support
-- Audit Logs
-- Advanced Finance Features
-- Production Hardening
+- Phase 13 - Documents & File Management
+- Phase 14 - Notifications & Communications
+- Phase 15 - Multi-Branch Support
+- Phase 16 - Audit Logs
+- Phase 17 - Advanced Finance
+- Phase 18 - Production Hardening
 
 ---
 
@@ -152,17 +294,36 @@ All implemented Phase 1-10 tables have Row Level Security strategies aligned wit
 
 ## Project Health
 
-- Build Status: Passing
-- Lint Status: Passing
-- Type Check Status: Passing
+Build Status: Passing
+
+Lint Status: Passing
+
+Type Check: Passing
 
 ---
 
 ## Notes
 
-Premium Boutique Dashboard v2 was completed after Phase 10 approval.
+Premium Boutique Dashboard v3
 
-The enhancement added analytics widgets, KPI trend cards, attendance trends, revenue trends, enrolment trends, quick actions, and operational dashboard improvements without changing database schema, permissions, business logic, routes, or workflows.
+Premium Boutique Dashboard v3 supersedes the previous v2 visual system.
+
+The v3 design language introduces a premium boutique user experience with:
+
+- Refined typography
+- Improved spacing and visual hierarchy
+- Premium authentication experience
+- Consistent branding across authentication pages
+- Modern responsive layouts
+- Improved accessibility
+- Premium component styling
+- Soft shadows and rounded cards
+- Consistent iconography
+- Enhanced user experience
+
+The completed Premium Login Experience is now the official visual reference for all future dashboard, portal, and management pages.
+
+Future UI improvements should follow the Premium Boutique Dashboard v3 design language to ensure a consistent experience across the entire Little London Management System.
 
 Phase 11 Parent Portal MVP was completed, reviewed, security-fixed, approved, and locally validated.
 
@@ -177,6 +338,12 @@ Parent users can securely view:
 
 The portal is intentionally read-only in this phase and uses parent-safe views instead of direct access to sensitive tables.
 
-This document reflects the approved state after Phase 11.
+Phase 12 Reports & Analytics has been approved after resolving the reporting-view security review.
+
+Premium Login Experience is now considered complete and serves as the design reference for all future UI work.
+
+Future UI work should follow the Premium Boutique Dashboard v3 design language established by the authentication pages.
+
+This document reflects the approved state after Phase 12.
 
 This document is a living milestone summary for the Little London Management System and should be updated after each reviewed and approved phase.
