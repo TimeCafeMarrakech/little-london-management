@@ -2,24 +2,24 @@ import { cn } from "@/lib/utils";
 import type { DashboardStat } from "@/lib/dashboard/data";
 
 const toneClasses: Record<DashboardStat["tone"], string> = {
-  navy: "bg-primary",
-  sky: "bg-muted",
-  orange: "bg-accent",
-  neutral: "bg-secondary",
+  navy: "bg-[#0f2d47]",
+  sky: "bg-[#ddeaf5]",
+  orange: "bg-[#f24a3a]",
+  neutral: "bg-[#8cc9a8]",
 };
 
 const glowClasses: Record<DashboardStat["tone"], string> = {
-  navy: "bg-primary/10 text-primary",
-  sky: "bg-muted text-primary",
-  orange: "bg-accent/20 text-primary",
-  neutral: "bg-secondary/25 text-primary",
+  navy: "bg-[#0f2d47]/10 text-[#0f2d47]",
+  sky: "bg-[#ddeaf5] text-[#0f2d47]",
+  orange: "bg-[#f24a3a]/10 text-[#f24a3a]",
+  neutral: "bg-[#8cc9a8]/20 text-[#0f2d47]",
 };
 
 const trendStrokeClasses: Record<DashboardStat["tone"], string> = {
-  navy: "stroke-primary",
-  sky: "stroke-secondary",
-  orange: "stroke-accent",
-  neutral: "stroke-primary/70",
+  navy: "stroke-[#0f2d47]",
+  sky: "stroke-[#8cc9a8]",
+  orange: "stroke-[#f24a3a]",
+  neutral: "stroke-[#d6b36a]",
 };
 
 type StatCardProps = {
@@ -43,19 +43,19 @@ function trendPoints(values: number[]): string {
 
 export function StatCard({ stat }: StatCardProps) {
   return (
-    <div className="ll-card-premium group p-5 transition duration-300 hover:-translate-y-0.5 hover:shadow-premium">
+    <div className="group rounded-[1.5rem] border border-white/80 bg-white/90 p-5 shadow-[0_22px_55px_rgba(15,45,71,0.08)] backdrop-blur transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_28px_70px_rgba(15,45,71,0.12)]">
       <div className="mb-6 flex items-center justify-between gap-4">
         <div className={cn("inline-flex rounded-full px-3 py-1 text-xs font-semibold", glowClasses[stat.tone])}>
           {stat.label}
         </div>
         <span className={cn("h-3 w-3 rounded-full shadow-inner-soft", toneClasses[stat.tone])} aria-hidden="true" />
       </div>
-      <div className="text-3xl font-semibold tracking-tight text-foreground">{stat.value}</div>
-      <p className="mt-3 text-sm leading-6 text-muted-foreground">{stat.helper}</p>
-      <div className="mt-5 rounded-lg bg-background/60 p-3 shadow-inner-soft">
+      <div className="text-3xl font-semibold tracking-tight text-[#0f2d47]">{stat.value}</div>
+      <p className="mt-3 text-sm leading-6 text-[#5b6f82]">{stat.helper}</p>
+      <div className="mt-5 rounded-2xl bg-[#fff8ee] p-3 shadow-inner-soft">
         <div className="mb-2 flex items-center justify-between gap-3 text-xs">
-          <span className="font-semibold text-primary">{stat.trendLabel}</span>
-          <span className="text-muted-foreground">7 day view</span>
+          <span className="font-semibold text-[#0f2d47]">{stat.trendLabel}</span>
+          <span className="text-[#5b6f82]">7 day view</span>
         </div>
         <svg className="h-12 w-full overflow-visible" role="img" aria-label={`${stat.label} trend`} viewBox="0 0 120 44" preserveAspectRatio="none">
           <polyline

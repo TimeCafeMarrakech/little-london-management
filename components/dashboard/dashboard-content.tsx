@@ -1,3 +1,4 @@
+import Image from "next/image";
 import {
   ArrowRight,
   BarChart3,
@@ -12,10 +13,9 @@ import {
 
 import { DashboardCard } from "@/components/dashboard/dashboard-card";
 import { NotificationArea } from "@/components/dashboard/notification-area";
-import { StatCard } from "@/components/dashboard/stat-card";
 import { Button } from "@/components/ui/button";
-import { dashboardExperiences, notificationItems, shellHighlights } from "@/lib/dashboard/data";
 import type { UserProfile } from "@/lib/auth/types";
+import { dashboardExperiences, notificationItems, shellHighlights } from "@/lib/dashboard/data";
 import { cn } from "@/lib/utils";
 
 type DashboardContentProps = {
@@ -23,44 +23,11 @@ type DashboardContentProps = {
 };
 
 const heroPulse = [
-  { label: "Today's classes", value: "12", helper: "Across English, drama, and early years", icon: CalendarDays },
-  { label: "Today's attendance", value: "94%", helper: "Calm check-ins in progress", icon: ClipboardCheck },
-  { label: "Outstanding invoices", value: "18", helper: "Awaiting parent follow-up", icon: WalletCards },
-  { label: "Upcoming events", value: "6", helper: "Holiday and weekend sessions", icon: Sparkles },
-];
-
-const dashboardSections = [
-  {
-    label: "Operations",
-    title: "Daily school rhythm",
-    description: "Classes, attendance, staffing, and the gentle flow of the day.",
-    tone: "bg-primary",
-  },
-  {
-    label: "Learning",
-    title: "Child-centred progress",
-    description: "A clear view of students, teachers, courses, and class experiences.",
-    tone: "bg-secondary",
-  },
-  {
-    label: "Finance",
-    title: "Confident billing",
-    description: "Invoices, payments, and balances presented with calm clarity.",
-    tone: "bg-accent",
-  },
-  {
-    label: "Events",
-    title: "Boutique activities",
-    description: "Workshops, holiday camps, and birthday events with capacity awareness.",
-    tone: "bg-muted",
-  },
-];
-
-const chartBars = [
-  { label: "Classes", value: "78%", className: "bg-primary" },
-  { label: "Attendance", value: "94%", className: "bg-secondary" },
-  { label: "Finance", value: "68%", className: "bg-accent" },
-];
+  { label: "Today's Classes", value: "12", helper: "English, drama, and early years", icon: CalendarDays, tone: "coral" },
+  { label: "Today's Attendance", value: "94%", helper: "Calm check-ins in progress", icon: ClipboardCheck, tone: "sage" },
+  { label: "Outstanding Invoices", value: "18", helper: "Awaiting parent follow-up", icon: WalletCards, tone: "yellow" },
+  { label: "Upcoming Events", value: "6", helper: "Holiday and weekend sessions", icon: Sparkles, tone: "mint" },
+] as const;
 
 const analyticsWidgets = [
   {
@@ -68,7 +35,8 @@ const analyticsWidgets = [
     value: "94%",
     helper: "Strong completion across today's sessions",
     points: [82, 84, 87, 86, 90, 92, 94],
-    color: "stroke-primary",
+    color: "stroke-[#8cc9a8]",
+    fill: "fill-[#8cc9a8]/10",
     icon: ClipboardCheck,
   },
   {
@@ -76,7 +44,8 @@ const analyticsWidgets = [
     value: "+24",
     helper: "New enrolments this month",
     points: [18, 19, 20, 21, 22, 23, 24],
-    color: "stroke-secondary",
+    color: "stroke-[#f24a3a]",
+    fill: "fill-[#f24a3a]/10",
     icon: GraduationCap,
   },
   {
@@ -84,7 +53,8 @@ const analyticsWidgets = [
     value: "86k MAD",
     helper: "Revenue pacing above last month",
     points: [42, 45, 47, 54, 58, 63, 69],
-    color: "stroke-accent",
+    color: "stroke-[#d6b36a]",
+    fill: "fill-[#d6b36a]/15",
     icon: BarChart3,
   },
 ];
@@ -108,6 +78,36 @@ const quickActions = [
   { label: "Create Event", helper: "Plan a workshop or camp", icon: CalendarDays },
 ];
 
+const kpiToneClasses: Record<(typeof heroPulse)[number]["tone"], { card: string; icon: string; blob: string }> = {
+  coral: {
+    card: "bg-white/90 text-[#0f2d47]",
+    icon: "bg-[#f24a3a]/12 text-[#f24a3a]",
+    blob: "bg-[#f24a3a]/8",
+  },
+  sage: {
+    card: "bg-white/90 text-[#0f2d47]",
+    icon: "bg-[#8cc9a8]/30 text-[#0f2d47]",
+    blob: "bg-[#8cc9a8]/25",
+  },
+  yellow: {
+    card: "bg-white/90 text-[#0f2d47]",
+    icon: "bg-[#d6b36a]/25 text-[#0f2d47]",
+    blob: "bg-[#d6b36a]/20",
+  },
+  mint: {
+    card: "bg-white/90 text-[#0f2d47]",
+    icon: "bg-[#f24a3a]/10 text-[#f24a3a]",
+    blob: "bg-[#f24a3a]/8",
+  },
+};
+
+const kpiLabelClasses: Record<(typeof heroPulse)[number]["tone"], string> = {
+  coral: "text-[#f24a3a]",
+  sage: "text-[#54a878]",
+  yellow: "text-[#d89d1d]",
+  mint: "text-[#f24a3a]",
+};
+
 function trendPoints(values: number[]): string {
   const max = Math.max(...values);
   const min = Math.min(...values);
@@ -115,12 +115,16 @@ function trendPoints(values: number[]): string {
 
   return values
     .map((value, index) => {
-      const x = (index / (values.length - 1 || 1)) * 160;
-      const y = 56 - ((value - min) / range) * 44;
+      const x = (index / (values.length - 1 || 1)) * 180;
+      const y = 68 - ((value - min) / range) * 50;
 
       return `${x.toFixed(1)},${y.toFixed(1)}`;
     })
     .join(" ");
+}
+
+function trendFillPoints(values: number[]): string {
+  return `0,76 ${trendPoints(values)} 180,76`;
 }
 
 export function DashboardContent({ profile }: DashboardContentProps) {
@@ -128,117 +132,166 @@ export function DashboardContent({ profile }: DashboardContentProps) {
   const notifications = notificationItems[profile.role];
 
   return (
-    <div className="space-y-8">
-      <section className="overflow-hidden rounded-2xl border border-primary/10 bg-primary shadow-premium">
-        <div className="grid gap-8 p-6 lg:grid-cols-[1fr_340px] lg:p-8">
-          <div>
-            <div className="mb-5 flex flex-wrap gap-2">
-              {shellHighlights.map((highlight) => {
-                const Icon = highlight.icon;
+    <div className="space-y-6">
+      <section className="grid gap-6 xl:grid-cols-[1.55fr_0.68fr]">
+        <div className="relative min-h-[340px] overflow-hidden rounded-[1.6rem] border border-[#eadfce] bg-[#fff8ee] p-6 shadow-[0_25px_70px_rgba(15,45,71,0.09)] lg:p-8">
+          <div className="absolute -left-20 -top-24 h-52 w-52 rounded-full bg-[#f24a3a]/12" aria-hidden="true" />
+          <div className="absolute bottom-0 right-0 h-72 w-[48%] rounded-tl-full bg-[#8cc9a8]/28" aria-hidden="true" />
+          <div className="absolute bottom-4 right-24 h-16 w-16 rounded-full bg-[#d6b36a]/18" aria-hidden="true" />
 
-                return (
-                  <span
-                    className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-semibold text-primary-foreground/80"
-                    key={highlight.label}
-                  >
-                    <Icon className="h-3.5 w-3.5 text-accent" aria-hidden="true" />
-                    {highlight.label}
-                  </span>
-                );
-              })}
-            </div>
-            <p className="text-sm font-medium text-accent">Welcome back, Noura</p>
-            <h1 className="mt-2 max-w-3xl text-4xl font-semibold tracking-tight text-primary-foreground md:text-5xl">
-              Little London Operations Centre
-            </h1>
-            <p className="mt-4 max-w-2xl text-base leading-7 text-primary-foreground/75">{experience.subtitle}</p>
-            <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-              {heroPulse.map((item) => {
-                const Icon = item.icon;
+          <div className="relative z-10 flex min-h-[276px] max-w-[58%] flex-col justify-center max-lg:max-w-none">
+            <div className="mb-8 flex flex-wrap gap-2">
+                {shellHighlights.map((highlight) => {
+                  const Icon = highlight.icon;
 
-                return (
-                  <div className="rounded-xl border border-white/10 bg-white/10 p-4 shadow-inner-soft" key={item.label}>
-                    <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-accent">
-                      <Icon className="h-4 w-4" aria-hidden="true" />
-                      {item.label}
-                    </div>
-                    <p className="mt-3 text-2xl font-semibold text-primary-foreground">{item.value}</p>
-                    <p className="mt-1 text-xs leading-5 text-primary-foreground/60">{item.helper}</p>
-                  </div>
-                );
-              })}
-            </div>
+                  return (
+                    <span
+                      className="inline-flex items-center gap-2 rounded-full border border-white/80 bg-white/75 px-3 py-1.5 text-xs font-semibold text-[#0f2d47] shadow-inner-soft"
+                      key={highlight.label}
+                    >
+                      <Icon className="h-3.5 w-3.5 text-[#f24a3a]" aria-hidden="true" />
+                      {highlight.label}
+                    </span>
+                  );
+                })}
+              </div>
+              <p className="whitespace-nowrap text-base font-semibold text-[#f24a3a]">Welcome back, Noura</p>
+              <h1 className="mt-3 text-[2.65rem] font-bold leading-[1.08] tracking-tight text-[#0f2d47] xl:text-[3.35rem]">
+                <span className="block whitespace-nowrap">Little London</span>
+                <span className="block whitespace-nowrap">Operations Centre</span>
+              </h1>
+              <p className="mt-5 max-w-xl text-base leading-7 text-[#5b6f82]">{experience.subtitle}</p>
           </div>
-          <NotificationArea items={notifications} />
+
+          <div className="absolute inset-y-0 right-0 hidden w-[47%] overflow-hidden lg:block">
+              <div className="absolute left-[72%] top-0 z-20 h-20 w-1 -translate-x-1/2 bg-[#f24a3a]" aria-hidden="true" />
+              <div className="absolute left-[72%] top-[4.5rem] z-20 h-12 w-20 -translate-x-1/2 rounded-b-full rounded-t-md bg-[#f24a3a] shadow-[0_14px_24px_rgba(242,74,58,0.28)]" aria-hidden="true">
+                <span className="absolute bottom-0 left-1/2 h-3 w-12 -translate-x-1/2 rounded-full bg-[#ffeaa7]" />
+                <span className="absolute left-1/2 top-10 h-24 w-40 -translate-x-1/2 rounded-full bg-[#ffeaa7]/35 blur-2xl" />
+              </div>
+              <div className="absolute left-8 top-9 z-10 text-[#f6b22d]" aria-hidden="true">
+                <svg className="h-16 w-24" viewBox="0 0 120 80" fill="none">
+                  <path d="M7 58c26-6 32-30 54-24" stroke="currentColor" strokeWidth="3" strokeDasharray="7 7" strokeLinecap="round" />
+                  <path d="M70 14l36-12-13 34-10-16-18 12 12-18-7 0z" stroke="currentColor" strokeWidth="3" strokeLinejoin="round" />
+                </svg>
+              </div>
+              <div className="absolute inset-x-0 bottom-0 h-[265px] overflow-hidden">
+                <Image
+                  src="/auth/little-london-kids.png"
+                  alt=""
+                  fill
+                  className="object-contain object-bottom"
+                  sizes="45vw"
+                  priority={false}
+                />
+                <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-[#fff8ee]/95 to-transparent" aria-hidden="true" />
+              </div>
+          </div>
         </div>
+
+        <NotificationArea items={notifications} />
       </section>
 
-      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4" aria-label="Dashboard highlights">
-        {experience.stats.map((stat) => (
-          <StatCard key={stat.label} stat={stat} />
-        ))}
-      </section>
+      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4" aria-label="Daily dashboard highlights">
+        {heroPulse.map((item) => {
+          const Icon = item.icon;
+          const tone = kpiToneClasses[item.tone];
 
-      <section className="grid gap-5 md:grid-cols-2 xl:grid-cols-4" aria-label="Dashboard sections">
-        {dashboardSections.map((section) => (
-          <section className="ll-card-premium p-5" key={section.label}>
-            <span className={cn("mb-5 block h-1.5 w-16 rounded-full", section.tone)} aria-hidden="true" />
-            <p className="ll-section-label">{section.label}</p>
-            <h2 className="mt-2 text-lg font-semibold tracking-tight">{section.title}</h2>
-            <p className="mt-3 text-sm leading-6 text-muted-foreground">{section.description}</p>
-          </section>
-        ))}
-      </section>
-
-      <section className="grid gap-5 lg:grid-cols-[1.1fr_0.9fr]">
-        <DashboardCard>
-          <p className="ll-section-label">Performance</p>
-          <h2 className="mt-2 text-xl font-semibold tracking-tight">Calm operational signals</h2>
-          <div className="mt-6 space-y-5">
-            {chartBars.map((bar) => (
-              <div key={bar.label}>
-                <div className="mb-2 flex items-center justify-between text-sm">
-                  <span className="font-medium">{bar.label}</span>
-                  <span className="text-muted-foreground">{bar.value}</span>
-                </div>
-                <div className="h-3 rounded-full bg-muted/70">
-                  <div className={cn("h-3 rounded-full", bar.className)} style={{ width: bar.value }} />
-                </div>
-              </div>
-            ))}
-          </div>
-        </DashboardCard>
-
-        <DashboardCard>
-          <p className="ll-section-label">Upcoming events</p>
-          <h2 className="mt-2 text-xl font-semibold tracking-tight">Workshops and special bookings</h2>
-          <div className="mt-5 space-y-3">
-            {upcomingEvents.map((event) => (
-              <div className="ll-list-row flex items-center justify-between gap-4 text-sm" key={event.title}>
+          return (
+            <article
+              className={cn("relative overflow-hidden rounded-[1.35rem] border border-[#eadfce] p-6 shadow-[0_20px_50px_rgba(15,45,71,0.07)]", tone.card)}
+              key={item.label}
+            >
+              <div className={cn("absolute -right-8 -top-8 h-28 w-28 rounded-full", tone.blob)} aria-hidden="true" />
+              <div className="relative flex items-start justify-between gap-4">
                 <div>
-                  <p className="font-semibold text-foreground">{event.title}</p>
-                  <p className="mt-1 text-xs text-muted-foreground">{event.meta}</p>
+                  <p className={cn("text-sm font-bold uppercase tracking-[0.12em]", kpiLabelClasses[item.tone])}>{item.label}</p>
+                  <p className="mt-4 text-4xl font-semibold tracking-tight">{item.value}</p>
+                  <p className="mt-2 text-sm leading-6 text-[#5b6f82]">{item.helper}</p>
                 </div>
-                <span className="rounded-full bg-accent/15 px-3 py-1 text-xs font-semibold text-primary">{event.capacity}</span>
+                <span className={cn("flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl", tone.icon)}>
+                  <Icon className="h-5 w-5" aria-hidden="true" />
+                </span>
               </div>
-            ))}
+            </article>
+          );
+        })}
+      </section>
+
+      <section className="grid gap-5 xl:grid-cols-[1.05fr_0.95fr]">
+        <DashboardCard>
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[#8cc9a8] text-white">
+                <BarChart3 className="h-5 w-5" aria-hidden="true" />
+              </span>
+              <h2 className="text-lg font-semibold tracking-tight text-[#0f2d47]">Revenue Overview</h2>
+            </div>
+            <button className="rounded-xl border border-[#eadfce] bg-white px-4 py-2 text-sm font-medium text-[#0f2d47]" type="button">
+              This Month
+            </button>
+          </div>
+          <div className="mt-8 grid gap-6 lg:grid-cols-[220px_1fr] lg:items-end">
+            <div>
+              <p className="text-4xl font-semibold tracking-tight text-[#0f2d47]">142,000 MAD</p>
+              <p className="mt-4 text-sm font-semibold text-[#27a86b]">+ 12.5% <span className="font-medium text-[#5b6f82]">vs last month</span></p>
+            </div>
+            <div className="relative h-40 overflow-hidden rounded-2xl bg-gradient-to-b from-white to-[#eaf5ee]/60 p-3">
+              <div className="absolute left-4 top-5 space-y-8 text-xs text-[#9aa8b4]" aria-hidden="true">
+                <p>160k</p>
+                <p>120k</p>
+                <p>80k</p>
+              </div>
+              <svg className="h-full w-full pl-14" viewBox="0 0 320 150" preserveAspectRatio="none" role="img" aria-label="Revenue overview chart">
+                <path d="M0 120 C45 105 70 96 105 70 C135 45 150 60 175 80 C210 105 225 82 250 68 C280 48 290 72 320 58 L320 150 L0 150 Z" fill="#8cc9a8" opacity="0.14" />
+                <path d="M0 120 C45 105 70 96 105 70 C135 45 150 60 175 80 C210 105 225 82 250 68 C280 48 290 72 320 58" fill="none" stroke="#71bd8e" strokeWidth="4" strokeLinecap="round" />
+                {[0, 58, 105, 175, 250, 320].map((x, index) => (
+                  <circle key={x} cx={x} cy={[120, 96, 70, 80, 68, 58][index]} r="5" fill="#71bd8e" stroke="white" strokeWidth="3" />
+                ))}
+              </svg>
+            </div>
           </div>
         </DashboardCard>
 
-        {experience.panels.map((panel) => (
-          <DashboardCard key={panel.title}>
-            <p className="ll-section-label">{panel.eyebrow}</p>
-            <h2 className="mt-2 text-xl font-semibold tracking-tight">{panel.title}</h2>
-            <div className="mt-5 space-y-3">
-              {panel.items.map((item) => (
-                <div key={item} className="ll-list-row flex items-center gap-3 text-sm">
-                  <span className="h-2 w-2 rounded-full bg-accent" />
-                  <span>{item}</span>
+        <DashboardCard>
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[#d6b36a] text-white">
+                <ClipboardCheck className="h-5 w-5" aria-hidden="true" />
+              </span>
+              <h2 className="text-lg font-semibold tracking-tight text-[#0f2d47]">Attendance Overview</h2>
+            </div>
+            <button className="rounded-xl border border-[#eadfce] bg-white px-4 py-2 text-sm font-medium text-[#0f2d47]" type="button">
+              This Week
+            </button>
+          </div>
+          <div className="mt-7 grid gap-6 sm:grid-cols-[190px_1fr] sm:items-center">
+            <div className="relative mx-auto h-40 w-40">
+              <svg className="h-full w-full -rotate-90" viewBox="0 0 120 120" role="img" aria-label="Attendance overview donut chart">
+                <circle cx="60" cy="60" r="44" fill="none" stroke="#f1ebe1" strokeWidth="16" />
+                <circle cx="60" cy="60" r="44" fill="none" stroke="#71bd8e" strokeWidth="16" strokeDasharray="260 276" strokeLinecap="round" />
+                <circle cx="60" cy="60" r="44" fill="none" stroke="#f57261" strokeWidth="16" strokeDasharray="14 276" strokeDashoffset="-260" strokeLinecap="round" />
+                <circle cx="60" cy="60" r="44" fill="none" stroke="#f6c85f" strokeWidth="16" strokeDasharray="8 276" strokeDashoffset="-274" strokeLinecap="round" />
+              </svg>
+              <div className="absolute inset-0 flex items-center justify-center text-3xl font-semibold text-[#0f2d47]">94%</div>
+            </div>
+            <div className="space-y-4">
+              {[
+                { label: "Present", value: "94% (286)", dot: "bg-[#71bd8e]" },
+                { label: "Absent", value: "4% (12)", dot: "bg-[#f57261]" },
+                { label: "Late", value: "2% (6)", dot: "bg-[#f6c85f]" },
+              ].map((item) => (
+                <div className="flex items-center justify-between gap-3 text-sm" key={item.label}>
+                  <span className="flex items-center gap-2 text-[#0f2d47]">
+                    <span className={cn("h-3 w-3 rounded-full", item.dot)} />
+                    {item.label}
+                  </span>
+                  <span className="font-semibold text-[#0f2d47]">{item.value}</span>
                 </div>
               ))}
             </div>
-          </DashboardCard>
-        ))}
+          </div>
+        </DashboardCard>
       </section>
 
       <section className="grid gap-5 xl:grid-cols-3" aria-label="Analytics widgets">
@@ -249,15 +302,16 @@ export function DashboardContent({ profile }: DashboardContentProps) {
             <DashboardCard key={widget.label}>
               <div className="flex items-start justify-between gap-4">
                 <div>
-                  <p className="ll-section-label">{widget.label}</p>
-                  <h2 className="mt-2 text-2xl font-semibold tracking-tight">{widget.value}</h2>
-                  <p className="mt-2 text-sm leading-6 text-muted-foreground">{widget.helper}</p>
+                  <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#68a783]">{widget.label}</p>
+                  <h2 className="mt-2 text-2xl font-semibold tracking-tight text-[#0f2d47]">{widget.value}</h2>
+                  <p className="mt-2 text-sm leading-6 text-[#5b6f82]">{widget.helper}</p>
                 </div>
-                <span className="rounded-xl bg-muted/75 p-3 text-primary shadow-inner-soft">
+                <span className="rounded-2xl bg-[#fff8ee] p-3 text-[#0f2d47] shadow-inner-soft">
                   <Icon className="h-5 w-5" aria-hidden="true" />
                 </span>
               </div>
-              <svg className="mt-6 h-24 w-full" viewBox="0 0 160 64" preserveAspectRatio="none" role="img" aria-label={`${widget.label} chart`}>
+              <svg className="mt-6 h-28 w-full" viewBox="0 0 180 82" preserveAspectRatio="none" role="img" aria-label={`${widget.label} chart`}>
+                <polygon className={widget.fill} points={trendFillPoints(widget.points)} />
                 <polyline
                   className={cn("fill-none stroke-[4]", widget.color)}
                   points={trendPoints(widget.points)}
@@ -273,60 +327,79 @@ export function DashboardContent({ profile }: DashboardContentProps) {
 
       <section className="grid gap-5 lg:grid-cols-[0.9fr_1.1fr]">
         <DashboardCard>
-          <p className="ll-section-label">Outstanding invoices</p>
-          <h2 className="mt-2 text-xl font-semibold tracking-tight">Finance follow-up</h2>
+          <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#f24a3a]">Upcoming events</p>
+          <h2 className="mt-2 text-xl font-semibold tracking-tight text-[#0f2d47]">Workshops and special bookings</h2>
           <div className="mt-5 space-y-3">
-            {outstandingInvoices.map((invoice) => (
-              <div className="ll-list-row flex items-center justify-between gap-4 text-sm" key={invoice.family}>
+            {upcomingEvents.map((event) => (
+              <div className="flex items-center justify-between gap-4 rounded-2xl border border-[#dde5ec]/80 bg-[#fff8ee] p-4 text-sm" key={event.title}>
                 <div>
-                  <p className="font-semibold text-foreground">{invoice.family}</p>
-                  <p className="mt-1 text-xs text-muted-foreground">{invoice.status}</p>
+                  <p className="font-semibold text-[#0f2d47]">{event.title}</p>
+                  <p className="mt-1 text-xs text-[#5b6f82]">{event.meta}</p>
                 </div>
-                <span className="text-sm font-semibold text-primary">{invoice.amount}</span>
+                <span className="rounded-full bg-[#8cc9a8]/20 px-3 py-1 text-xs font-semibold text-[#0f2d47]">{event.capacity}</span>
               </div>
             ))}
           </div>
         </DashboardCard>
 
         <DashboardCard>
-          <p className="ll-section-label">Operational alerts</p>
-          <h2 className="mt-2 text-xl font-semibold tracking-tight">What needs calm attention</h2>
-          <div className="mt-5 grid gap-3 md:grid-cols-3">
-            {[
-              { label: "Attendance", value: "2 sessions pending", tone: "bg-secondary/25" },
-              { label: "Finance", value: "6 invoices due soon", tone: "bg-accent/20" },
-              { label: "Events", value: "1 event near capacity", tone: "bg-muted" },
-            ].map((alert) => (
-              <div className={cn("rounded-xl border border-border/70 p-4 shadow-inner-soft", alert.tone)} key={alert.label}>
-                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-primary">{alert.label}</p>
-                <p className="mt-3 text-sm leading-6 text-muted-foreground">{alert.value}</p>
+          <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#d6b36a]">Outstanding invoices</p>
+          <h2 className="mt-2 text-xl font-semibold tracking-tight text-[#0f2d47]">Finance follow-up</h2>
+          <div className="mt-5 space-y-3">
+            {outstandingInvoices.map((invoice) => (
+              <div className="flex items-center justify-between gap-4 rounded-2xl border border-[#dde5ec]/80 bg-[#fff8ee] p-4 text-sm" key={invoice.family}>
+                <div>
+                  <p className="font-semibold text-[#0f2d47]">{invoice.family}</p>
+                  <p className="mt-1 text-xs text-[#5b6f82]">{invoice.status}</p>
+                </div>
+                <span className="text-sm font-semibold text-[#0f2d47]">{invoice.amount}</span>
               </div>
             ))}
           </div>
         </DashboardCard>
       </section>
 
+      <section className="grid gap-5 lg:grid-cols-[1.1fr_0.9fr]">
+        {experience.panels.map((panel) => (
+          <DashboardCard key={panel.title}>
+            <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#68a783]">{panel.eyebrow}</p>
+            <h2 className="mt-2 text-xl font-semibold tracking-tight text-[#0f2d47]">{panel.title}</h2>
+            <div className="mt-5 space-y-3">
+              {panel.items.map((item) => (
+                <div key={item} className="flex items-center gap-3 rounded-2xl border border-[#dde5ec]/80 bg-[#fff8ee] p-4 text-sm text-[#30495f]">
+                  <span className="h-2.5 w-2.5 rounded-full bg-[#f24a3a]" />
+                  <span>{item}</span>
+                </div>
+              ))}
+            </div>
+          </DashboardCard>
+        ))}
+      </section>
+
       <DashboardCard>
         <div className="flex flex-col gap-5">
           <div>
-            <p className="ll-section-label">Quick actions</p>
-            <h2 className="mt-2 text-xl font-semibold tracking-tight">Frequent operations</h2>
-            <p className="mt-2 text-sm leading-6 text-muted-foreground">
-              Presentation-only action cards for the core operations team.
-            </p>
+            <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#f24a3a]">Quick actions</p>
+            <h2 className="mt-2 text-xl font-semibold tracking-tight text-[#0f2d47]">Frequent operations</h2>
+            <p className="mt-2 text-sm leading-6 text-[#5b6f82]">Presentation-only action cards for the core operations team.</p>
           </div>
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
             {quickActions.map((action) => {
               const Icon = action.icon;
 
               return (
-                <Button className="h-auto justify-start p-4 text-left" key={action.label} type="button" variant="outline">
-                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-accent/15 text-primary">
+                <Button
+                  className="h-auto justify-start rounded-2xl border-[#dde5ec] bg-white/80 p-4 text-left text-[#0f2d47] shadow-inner-soft hover:bg-[#fff8ee]"
+                  key={action.label}
+                  type="button"
+                  variant="outline"
+                >
+                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#f24a3a]/10 text-[#f24a3a]">
                     <Icon className="h-5 w-5" aria-hidden="true" />
                   </span>
                   <span className="min-w-0">
                     <span className="block text-sm font-semibold">{action.label}</span>
-                    <span className="mt-1 block whitespace-normal text-xs font-medium text-muted-foreground">{action.helper}</span>
+                    <span className="mt-1 block whitespace-normal text-xs font-medium text-[#5b6f82]">{action.helper}</span>
                   </span>
                   <ArrowRight className="ml-auto h-4 w-4 shrink-0" aria-hidden="true" />
                 </Button>
