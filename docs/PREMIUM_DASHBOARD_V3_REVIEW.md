@@ -2,18 +2,27 @@
 
 ## Summary
 
-The Premium Dashboard v3 work has moved the logged-in dashboard much closer to the approved Play & Learn visual direction.
+Premium Dashboard v3 has been reviewed after the latest dashboard visual polish and follow-up fixes.
 
-The current dashboard uses the correct warm cream, coral, sage, navy, and soft shadow language. The shell, sidebar, header, hero, notification card, KPI cards, and analytics widgets visually align with the Premium Boutique Dashboard v3 direction and the completed authentication UI.
+The dashboard now strongly aligns with the Premium Boutique Dashboard v3 direction and the completed Play & Learn login experience. The warm cream, coral, sage, navy, and warm yellow palette is consistent, and the overview dashboard now follows the intended first-fold structure:
 
-The latest hero layout specifically addresses the main visual problem from the prior screenshot: the title and children image were overlapping and the heading was wrapping into too many lines. The implementation now separates the text and image zones and forces the hero title into the intended two-line structure.
+- Sidebar navigation
+- Light premium header
+- Hero and notifications row
+- KPI cards
+- Revenue and attendance analytics
 
-However, this review found important navigation consistency issues that should be fixed before final approval.
+The prior review issues around desktop navigation filtering and the non-functional desktop collapse button have been fixed. Desktop and mobile navigation now use the same role-aware `roleNavigation[profile.role]` model.
+
+This review found no database, migration, Supabase, authentication, permission, service, route, server action, or business logic changes.
+
+The dashboard is close to approval, but two UI issues should be fixed before this is treated as the final approved baseline.
 
 ## Files Reviewed
 
 - `docs/PROJECT_STATUS.md`
 - `docs/PREMIUM_DASHBOARD_V3_REDESIGN_REPORT.md`
+- `docs/PREMIUM_DASHBOARD_V3_FIX_REPORT.md`
 - `components/dashboard/dashboard-shell.tsx`
 - `components/dashboard/dashboard-content.tsx`
 - `components/dashboard/dashboard-card.tsx`
@@ -23,8 +32,8 @@ However, this review found important navigation consistency issues that should b
 - `components/navigation/header.tsx`
 - `components/navigation/mobile-navigation.tsx`
 - `components/navigation/user-menu.tsx`
-- Uploaded dashboard result screenshot
-- Uploaded dashboard target reference screenshot
+- Uploaded current dashboard screenshot
+- Uploaded Premium Dashboard v3 target screenshot
 
 ## Command Results
 
@@ -36,20 +45,24 @@ However, this review found important navigation consistency issues that should b
 
 ## Passed Items
 
-- Premium Boutique Dashboard v3 palette is in place.
-- Dashboard visuals are consistent with the Play & Learn login design language.
-- Sidebar uses the Little London Play & Learn coral bus branding.
-- Sidebar remains vertically scrollable for long navigation.
-- Header includes search, notification button, language pill, user card, and logout.
-- Hero card styling matches the warm cream, rounded, softly shadowed target direction.
-- "Little London Operations Centre" is now explicitly structured into two lines.
-- Kids image is placed in a separate right-side visual zone.
-- Notifications card follows the target card style with coral icon and soft list rows.
-- KPI cards follow the target white-card layout with coral, sage, and yellow accents.
-- Revenue and attendance widgets match the target analytics direction.
-- Mobile navigation remains available and usable.
-- Text contrast is generally strong against the cream and white surfaces.
-- No database schema, migrations, Supabase config, authentication logic, permissions, services, server actions, or route files were modified as part of this review.
+- Premium Dashboard v3 colour palette is consistent.
+- Visual direction matches the completed Play & Learn login language.
+- Sidebar branding uses the Little London Play & Learn coral bus style.
+- Sidebar remains scrollable.
+- Desktop and mobile navigation now use the same role-aware navigation source.
+- Desktop no longer hides `Payments` separately from mobile.
+- Desktop no longer renames `Invoices` separately from mobile.
+- Non-functional desktop collapse button has been removed.
+- No fake theme button was added.
+- Header search, language pill, user card, and logout remain visually aligned with the target.
+- Hero card uses warm cream, rounded corners, soft shadows, and decorative shapes.
+- “Little London Operations Centre” is structured as a two-line heading on desktop.
+- Kids image is separated from the text area and positioned on the right.
+- Notifications card matches the Premium Dashboard v3 visual system.
+- KPI cards use the correct white-card style with coral, sage, and warm yellow accents.
+- Revenue and attendance widgets visually match the approved analytics direction.
+- Lint, type-check, and build all pass.
+- No auth, database, RBAC, route, service, server action, or business logic changes were detected.
 
 ## Blockers
 
@@ -57,40 +70,38 @@ None found.
 
 ## Important Issues
 
-1. Desktop and mobile navigation are inconsistent.
+1. Sidebar role label is hard-coded to `Super Admin`.
 
-   In `components/navigation/sidebar.tsx`, the desktop sidebar filters out the `Payments` navigation item and renames `Invoices` to `Finance`. The mobile navigation still renders the original `roleNavigation` data, including separate `Invoices` and `Payments` entries.
+   In `components/navigation/sidebar.tsx`, the role label under the Little London logo is currently static text. This will display the wrong role for Admin, Teacher, and Parent users.
 
-   This does not change route files, RBAC, or services, but it does change the visible desktop navigation behavior and creates a mismatch between desktop and mobile.
+   Expected behavior: use the existing role-aware label source, such as `roleLabels[profile.role]`, without changing permissions or routing.
 
-2. Desktop sidebar no longer renders the role-aware navigation exactly as defined.
+2. Hero heading uses forced no-wrap lines that may overflow on smaller screens.
 
-   The sidebar derives `visibleNavigation` by filtering `roleNavigation`. Since the project requirement is to preserve role-aware navigation rules and not expose or hide routes unexpectedly, this should be reconciled before approval.
+   The desktop heading now matches the target direction, but both heading lines use `whitespace-nowrap`. This is safe for wide desktop layouts, but may cause horizontal overflow around tablet widths before the layout fully adapts.
+
+   Expected behavior: preserve the two-line desktop layout while allowing safer responsive sizing or wrapping on smaller breakpoints.
 
 ## Medium Issues
 
-1. Header theme control is not present in the current header implementation.
+1. Notification and language controls are visually styled as buttons but remain presentation-only.
 
-   The target screenshot includes a small theme-style icon button between the language selector and user card. The current header includes notification, language, user, and logout controls, but not the theme control.
+   This is acceptable for the current UI polish scope, but should be documented until real notification/language functionality is planned.
 
-2. The desktop header includes a collapse navigation button with no implemented collapse behavior.
+2. Pixel-level match is close but not exact.
 
-   It has an accessible label, but because it does not currently perform an action, it may confuse keyboard and screen-reader users.
-
-3. Hero title uses forced no-wrap lines.
-
-   This protects the desktop target layout, but it should be checked at tablet-width breakpoints to ensure no horizontal overflow occurs before the image hides.
+   The layout now follows the target structure, but final visual approval should still be based on a browser screenshot comparison at the intended desktop viewport.
 
 ## Minor Issues
 
-1. The review target and current implementation are very close visually, but exact pixel matching is not yet guaranteed.
+1. Some JSX indentation in `components/dashboard/dashboard-content.tsx` is visually uneven.
 
-2. Some visual controls are presentation-only, such as the notification button and language pill. This is acceptable for the current UI polish scope, but should remain documented until real interactions are planned.
+   This does not affect lint, type-check, or build, but can be cleaned up in a future polish pass.
 
-3. The notification list uses placeholder/static dashboard content, which is consistent with the current dashboard framework but should be replaced when notifications become a real module.
+2. Several report/dashboard visual values remain placeholder-style, which is consistent with the current dashboard framework.
 
 ## Approval Decision
 
 Requires fixes.
 
-The visual direction is approved in principle, and validation passes. Before this dashboard should be treated as the saved Premium Dashboard v3 baseline, the desktop navigation should be brought back into alignment with the role-aware navigation model, and the no-op header collapse control should either be made functional in a future scoped task or removed from the interactive control set.
+Premium Dashboard v3 is visually close and technically validated, but it should not be marked as the final approved UI baseline until the hard-coded sidebar role label and responsive hero heading risk are fixed.

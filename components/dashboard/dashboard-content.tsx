@@ -155,10 +155,10 @@ export function DashboardContent({ profile }: DashboardContentProps) {
                   );
                 })}
               </div>
-              <p className="whitespace-nowrap text-base font-semibold text-[#f24a3a]">Welcome back, Noura</p>
-              <h1 className="mt-3 text-[2.65rem] font-bold leading-[1.08] tracking-tight text-[#0f2d47] xl:text-[3.35rem]">
-                <span className="block whitespace-nowrap">Little London</span>
-                <span className="block whitespace-nowrap">Operations Centre</span>
+              <p className="text-base font-semibold text-[#f24a3a]">Welcome back, Noura</p>
+              <h1 className="mt-3 max-w-[680px] text-[clamp(2.25rem,4vw,3.35rem)] font-bold leading-[1.08] tracking-tight text-[#0f2d47]">
+                <span className="block xl:whitespace-nowrap">Little London</span>
+                <span className="block xl:whitespace-nowrap">Operations Centre</span>
               </h1>
               <p className="mt-5 max-w-xl text-base leading-7 text-[#5b6f82]">{experience.subtitle}</p>
           </div>

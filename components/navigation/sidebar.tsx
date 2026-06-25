@@ -1,7 +1,7 @@
 import { ChevronRight } from "lucide-react";
 import Link from "next/link";
 
-import { roleNavigation } from "@/lib/dashboard/data";
+import { roleLabels, roleNavigation } from "@/lib/dashboard/data";
 import type { UserProfile } from "@/lib/auth/types";
 import { cn } from "@/lib/utils";
 
@@ -33,7 +33,7 @@ export function Sidebar({ profile }: SidebarProps) {
           <div>
             <p className="font-serif text-xl font-bold uppercase tracking-[0.08em] text-[#f24a3a]">Little London</p>
             <p className="text-[0.64rem] font-bold uppercase tracking-[0.34em] text-[#68a783]">Play & Learn</p>
-            <p className="mt-0.5 text-xs font-medium text-[#5b6f82]">Super Admin</p>
+            <p className="mt-0.5 text-xs font-medium text-[#5b6f82]">{roleLabels[profile.role]}</p>
           </div>
         </div>
 
