@@ -107,7 +107,7 @@ export function PlayLearnAuthCard({ children, eyebrow, title, subtitle, centered
     <div className="relative w-full max-w-[640px] overflow-hidden rounded-[2rem] border border-white/90 bg-white/[0.96] px-6 pb-4 pt-16 shadow-[0_34px_95px_rgba(23,50,74,0.16)] backdrop-blur md:px-12 md:pb-5 md:pt-20">
       <LanguagePill />
       <div className="absolute -right-14 top-36 h-28 w-28 rounded-full bg-[#D9EFE4]/70" aria-hidden="true" />
-      <div className="absolute -left-12 bottom-24 h-24 w-24 rounded-full bg-[#DDEAF5]/85" aria-hidden="true" />
+      <div className="absolute -left-12 bottom-24 h-24 w-24 rounded-full bg-[#D9EFE4]/85" aria-hidden="true" />
 
       <div className={cn("relative", centered && "text-center")}>
         <div className="flex justify-center">

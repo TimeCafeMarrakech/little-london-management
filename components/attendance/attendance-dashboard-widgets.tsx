@@ -9,10 +9,10 @@ type AttendanceDashboardWidgetsProps = {
 export function AttendanceDashboardWidgets({ metrics }: AttendanceDashboardWidgetsProps) {
   const widgets = [
     { label: "Today's sessions", value: metrics.todaysSessions, helper: "Attendance sessions today", icon: ClipboardCheck, tone: "text-primary" },
-    { label: "Present", value: metrics.presentCount, helper: "Marked present today", icon: UserCheck, tone: "text-sky-600" },
+    { label: "Present", value: metrics.presentCount, helper: "Marked present today", icon: UserCheck, tone: "text-[#54a878]" },
     { label: "Absent", value: metrics.absentCount, helper: "Marked absent today", icon: UserX, tone: "text-accent" },
     { label: "Late", value: metrics.lateCount, helper: "Late arrivals today", icon: Clock, tone: "text-primary" },
-    { label: "Completion", value: `${metrics.completionRate}%`, helper: `${metrics.pendingSessions} pending`, icon: Percent, tone: "text-sky-600" },
+    { label: "Completion", value: `${metrics.completionRate}%`, helper: `${metrics.pendingSessions} pending`, icon: Percent, tone: "text-[#54a878]" },
   ] as const;
 
   return (

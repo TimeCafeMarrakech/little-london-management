@@ -1,4 +1,4 @@
-import { BarChart3, CalendarCheck, CreditCard, GraduationCap, LineChart, PieChart, UsersRound } from "lucide-react";
+import { BarChart3, CalendarCheck, CreditCard, GraduationCap, LineChart, PieChart, Sparkles, UsersRound } from "lucide-react";
 
 import { DashboardCard } from "@/components/dashboard/dashboard-card";
 import type { CategoryBreakdown, ReportsDashboardData, TrendPoint } from "@/features/reports/types";
@@ -17,24 +17,31 @@ function maxValue(items: Array<{ value: number }>): number {
 
 export function ReportsHero({ generatedAt }: { generatedAt: string }) {
   return (
-    <section className="overflow-hidden rounded-2xl border border-primary/10 bg-primary p-6 text-primary-foreground shadow-premium lg:p-8">
-      <p className="text-sm font-medium text-accent">Reports & analytics</p>
-      <h1 className="mt-2 max-w-4xl text-4xl font-semibold tracking-tight md:text-5xl">Little London insights centre</h1>
-      <p className="mt-4 max-w-3xl text-base leading-7 text-primary-foreground/75">
-        Read-only management reports for attendance, finance, enrolments, events, and parent/student operations.
-      </p>
-      <p className="mt-5 text-xs font-medium text-primary-foreground/60">
-        Last refreshed {new Intl.DateTimeFormat("en-GB", { dateStyle: "medium", timeStyle: "short" }).format(new Date(generatedAt))}
-      </p>
+    <section className="relative overflow-hidden rounded-[1.6rem] border border-[#eadfce] bg-[#fff8ee] p-6 text-[#0f2d47] shadow-[0_25px_70px_rgba(15,45,71,0.09)] lg:p-8">
+      <div className="absolute -left-16 bottom-0 h-40 w-40 rounded-full bg-[#f24a3a]/10" aria-hidden="true" />
+      <div className="absolute -right-14 -top-16 h-56 w-56 rounded-full bg-[#8cc9a8]/25" aria-hidden="true" />
+      <div className="relative">
+        <span className="inline-flex items-center gap-2 rounded-full border border-white/80 bg-white/75 px-3 py-1.5 text-xs font-semibold text-[#f24a3a] shadow-inner-soft">
+          <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
+          Reports & analytics
+        </span>
+        <h1 className="mt-4 max-w-4xl text-4xl font-semibold tracking-tight md:text-5xl">Little London Insights Centre</h1>
+        <p className="mt-4 max-w-3xl text-base leading-7 text-[#5b6f82]">
+          Read-only management reports for attendance, finance, enrolments, events, and parent/student operations.
+        </p>
+        <p className="mt-5 text-xs font-medium text-[#5b6f82]">
+          Last refreshed {new Intl.DateTimeFormat("en-GB", { dateStyle: "medium", timeStyle: "short" }).format(new Date(generatedAt))}
+        </p>
+      </div>
     </section>
   );
 }
 
 export function ReportMetricGrid({ data }: { data: ReportsDashboardData }) {
   const toneClass = {
-    navy: "bg-primary text-primary-foreground",
+    navy: "bg-[#f24a3a] text-white",
     sage: "bg-secondary/35 text-primary",
-    gold: "bg-accent/25 text-primary",
+    gold: "bg-[#d6b36a]/25 text-primary",
     neutral: "bg-muted text-primary",
   };
 
@@ -47,7 +54,7 @@ export function ReportMetricGrid({ data }: { data: ReportsDashboardData }) {
               <p className="text-sm font-medium text-muted-foreground">{metric.label}</p>
               <p className="mt-2 text-3xl font-semibold tracking-tight">{metric.value}</p>
             </div>
-            <span className={`rounded-lg px-3 py-2 text-xs font-semibold ${toneClass[metric.tone]}`}>{metric.tone}</span>
+            <span className={`rounded-full px-3 py-2 text-xs font-semibold capitalize ${toneClass[metric.tone]}`}>{metric.tone}</span>
           </div>
           <p className="mt-4 text-sm leading-6 text-muted-foreground">{metric.helper}</p>
         </article>
@@ -259,7 +266,7 @@ function TrendPanel({ title, eyebrow, items, money = false, suffix = "" }: { tit
 
           return (
             <div className="flex flex-1 flex-col items-center gap-2" key={item.label}>
-              <div className="w-full rounded-t-lg bg-primary/85 shadow-inner-soft" style={{ height: `${height}%` }} />
+              <div className="w-full rounded-t-lg bg-[#8cc9a8] shadow-inner-soft" style={{ height: `${height}%` }} />
               <span className="text-xs font-medium text-muted-foreground">{item.label}</span>
             </div>
           );

@@ -8,7 +8,7 @@ type TeacherDashboardWidgetsProps = {
 
 const widgetStyles = [
   { label: "Total teachers", key: "totalTeachers", icon: GraduationCap, helper: "Teacher profiles", tone: "text-primary" },
-  { label: "Active teachers", key: "activeTeachers", icon: UserCheck, helper: "Available for assignment", tone: "text-sky-600" },
+  { label: "Active teachers", key: "activeTeachers", icon: UserCheck, helper: "Available for assignment", tone: "text-[#54a878]" },
   { label: "Part-time", key: "partTimeTeachers", icon: BriefcaseBusiness, helper: "Flexible capacity", tone: "text-accent" },
   { label: "Archived", key: "archivedTeachers", icon: UserRoundX, helper: "Hidden from daily views", tone: "text-muted-foreground" },
 ] as const;

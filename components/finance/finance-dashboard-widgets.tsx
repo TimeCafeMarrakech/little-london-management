@@ -12,7 +12,7 @@ function formatMoney(value: number): string {
 
 const cards = [
   { key: "totalRevenue", label: "Total revenue", icon: TrendingUp, tone: "text-primary" },
-  { key: "outstandingInvoices", label: "Outstanding invoices", icon: ReceiptText, tone: "text-sky-700" },
+  { key: "outstandingInvoices", label: "Outstanding invoices", icon: ReceiptText, tone: "text-[#54a878]" },
   { key: "overdueInvoices", label: "Overdue invoices", icon: WalletCards, tone: "text-accent" },
   { key: "paymentsThisMonth", label: "Payments this month", icon: CreditCard, tone: "text-primary" },
 ] as const;

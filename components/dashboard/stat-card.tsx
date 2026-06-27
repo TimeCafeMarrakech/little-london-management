@@ -3,14 +3,14 @@ import type { DashboardStat } from "@/lib/dashboard/data";
 
 const toneClasses: Record<DashboardStat["tone"], string> = {
   navy: "bg-[#0f2d47]",
-  sky: "bg-[#ddeaf5]",
+  sky: "bg-[#8cc9a8]",
   orange: "bg-[#f24a3a]",
   neutral: "bg-[#8cc9a8]",
 };
 
 const glowClasses: Record<DashboardStat["tone"], string> = {
   navy: "bg-[#0f2d47]/10 text-[#0f2d47]",
-  sky: "bg-[#ddeaf5] text-[#0f2d47]",
+  sky: "bg-[#8cc9a8]/20 text-[#0f2d47]",
   orange: "bg-[#f24a3a]/10 text-[#f24a3a]",
   neutral: "bg-[#8cc9a8]/20 text-[#0f2d47]",
 };

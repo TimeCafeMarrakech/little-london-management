@@ -32,10 +32,14 @@ function formatDate(value: string | null): string {
 
 export function ParentPortalHero({ title, subtitle }: { title: string; subtitle: string }) {
   return (
-    <section className="overflow-hidden rounded-2xl border border-primary/10 bg-primary p-6 text-primary-foreground shadow-premium lg:p-8">
-      <p className="text-sm font-medium text-accent">Little London Parent Portal</p>
-      <h1 className="mt-2 max-w-3xl text-4xl font-semibold tracking-tight md:text-5xl">{title}</h1>
-      <p className="mt-4 max-w-2xl text-base leading-7 text-primary-foreground/75">{subtitle}</p>
+    <section className="relative overflow-hidden rounded-[1.6rem] border border-[#eadfce] bg-[#fff8ee] p-6 text-[#0f2d47] shadow-[0_25px_70px_rgba(15,45,71,0.09)] lg:p-8">
+      <div className="absolute -left-16 bottom-0 h-40 w-40 rounded-full bg-[#f24a3a]/10" aria-hidden="true" />
+      <div className="absolute -right-14 -top-16 h-56 w-56 rounded-full bg-[#8cc9a8]/25" aria-hidden="true" />
+      <div className="relative">
+        <p className="text-sm font-semibold text-[#f24a3a]">Little London Parent Portal</p>
+        <h1 className="mt-2 max-w-3xl text-4xl font-semibold tracking-tight md:text-5xl">{title}</h1>
+        <p className="mt-4 max-w-2xl text-base leading-7 text-[#5b6f82]">{subtitle}</p>
+      </div>
     </section>
   );
 }

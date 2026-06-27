@@ -68,7 +68,7 @@ export function MobileNavigation({ profile }: MobileNavigationProps) {
                     key={item.label}
                     onClick={() => setOpen(false)}
                   >
-                    <span className={cn("flex h-9 w-9 items-center justify-center rounded-full", item.active ? "bg-[#f24a3a] text-white" : "bg-[#ddeaf5] text-[#0f2d47]")}>
+                    <span className={cn("flex h-9 w-9 items-center justify-center rounded-full", item.active ? "bg-[#f24a3a] text-white" : "bg-[#e6f4ec] text-[#0f2d47]")}>
                       <Icon className="h-4 w-4" aria-hidden="true" />
                     </span>
                     <span>

@@ -8,12 +8,12 @@ type AcademicDashboardWidgetsProps = {
 
 const widgets = [
   { key: "totalCourses", label: "Total courses", helper: "Program catalogue", icon: BookOpen, tone: "text-primary" },
-  { key: "activeCourses", label: "Active courses", helper: "Open for classes", icon: BookOpen, tone: "text-sky-600" },
+  { key: "activeCourses", label: "Active courses", helper: "Open for classes", icon: BookOpen, tone: "text-[#54a878]" },
   { key: "totalClasses", label: "Total classes", helper: "Current class groups", icon: Layers3, tone: "text-primary" },
-  { key: "activeClasses", label: "Active classes", helper: "Running now", icon: Layers3, tone: "text-sky-600" },
+  { key: "activeClasses", label: "Active classes", helper: "Running now", icon: Layers3, tone: "text-[#54a878]" },
   { key: "classesNearCapacity", label: "Near capacity", helper: "80% or more filled", icon: UsersRound, tone: "text-accent" },
   { key: "totalEnrolments", label: "Total enrolments", helper: "Class memberships", icon: GraduationCap, tone: "text-primary" },
-  { key: "activeEnrolments", label: "Active enrolments", helper: "Currently attending", icon: GraduationCap, tone: "text-sky-600" },
+  { key: "activeEnrolments", label: "Active enrolments", helper: "Currently attending", icon: GraduationCap, tone: "text-[#54a878]" },
 ] as const;
 
 export function AcademicDashboardWidgets({ metrics }: AcademicDashboardWidgetsProps) {

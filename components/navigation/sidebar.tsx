@@ -57,7 +57,7 @@ export function Sidebar({ profile }: SidebarProps) {
                 <span
                   className={cn(
                     "flex h-10 w-10 items-center justify-center rounded-full",
-                    item.active ? "bg-[#f24a3a] text-white" : "bg-[#ddeaf5] text-[#0f2d47] group-hover:bg-[#f24a3a]/10 group-hover:text-[#f24a3a]",
+                    item.active ? "bg-[#f24a3a] text-white" : "bg-[#e6f4ec] text-[#0f2d47] group-hover:bg-[#f24a3a]/10 group-hover:text-[#f24a3a]",
                   )}
                 >
                   <Icon className="h-5 w-5" aria-hidden="true" />
