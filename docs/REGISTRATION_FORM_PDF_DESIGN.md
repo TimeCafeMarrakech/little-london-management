@@ -1,0 +1,530 @@
+# Registration Form PDF Design
+
+## 1. Purpose
+
+The Student Registration Form PDF is a premium branded A4 document generated from existing Little London student, parent, emergency contact, enrolment, and medical/allergy data.
+
+The document should provide a clean, professional registration summary that can be downloaded, printed, emailed, or shared manually through WhatsApp.
+
+The design must follow:
+
+- Premium Boutique Dashboard v3
+- Little London Play & Learn branding
+- Warm cream, coral, sage, navy, and warm yellow palette
+- Professional British-inspired boutique school style
+- Print-ready A4 formatting
+
+This document defines the design and content requirements only. It does not implement the PDF.
+
+## 2. User Workflow
+
+### Student Profile
+
+An authorized Admin or Super Admin opens a student profile.
+
+The student profile should contain an action area for registration document generation.
+
+### Generate Registration Form
+
+The user selects:
+
+- Generate Registration Form
+
+The system prepares the form using existing approved data.
+
+### Preview
+
+The user can preview the registration form before downloading or printing.
+
+Preview should show:
+
+- Page layout
+- Branding
+- Field values
+- Signature areas
+- Footer
+
+### Download PDF
+
+The user can download the generated A4 PDF.
+
+The downloaded file name should be clear and safe, for example:
+
+```text
+little-london-registration-{student_name}-{date}.pdf
+```
+
+### Print
+
+The user can print the PDF using the browser or operating system print flow.
+
+The PDF must remain readable and properly spaced when printed.
+
+### Prepare Email
+
+The user can copy or prepare an email subject and body.
+
+The PDF can then be attached manually or through a future email workflow.
+
+### Copy WhatsApp Message
+
+The user can copy a WhatsApp-ready message for manual sending.
+
+No WhatsApp API integration is included in this design.
+
+## 3. PDF Layout Structure
+
+### Header
+
+The header should appear at the top of page one.
+
+Include:
+
+- Little London Play & Learn logo
+- Document title: `Student Registration Form`
+- Generated date
+- Optional student photo if available
+
+Visual direction:
+
+- Logo left
+- Document title right or centered under logo area
+- Warm cream background
+- Coral accent line
+- Navy title text
+
+### Student Details
+
+A clear student information section should appear near the top.
+
+Use a premium card-like block with soft borders.
+
+Include:
+
+- Student full name
+- Student number
+- Date of birth
+- Age
+- Gender if recorded
+- Primary language
+- External school name if recorded
+- Student status where appropriate
+
+### Parent/Guardian Details
+
+Show linked parent and guardian records.
+
+If multiple parents are linked, show each in a structured table or repeated compact card.
+
+Include:
+
+- Parent/guardian full name
+- Relationship type
+- Primary contact indicator
+- Phone
+- Email
+- Alternate phone if available
+- City if available
+- Receives invoices indicator where appropriate for Admin version
+
+### Emergency Contact
+
+Show emergency contacts from existing emergency contact data.
+
+Include:
+
+- Emergency contact full name
+- Relationship
+- Phone
+- Alternate phone if available
+- Can pick up indicator
+
+If no emergency contact exists, show:
+
+```text
+No emergency contact recorded.
+```
+
+### Medical/Allergy Summary
+
+Show medical and allergy information according to the version being generated.
+
+Include where authorized:
+
+- Medical summary
+- Allergy summary
+- Care notes that are safe for the selected version
+- Emergency medical notes if approved for inclusion
+
+If no medical/allergy information exists, show:
+
+```text
+No medical or allergy information recorded.
+```
+
+### Enrolment/Class Summary
+
+Show current enrolment and class information where available.
+
+Include:
+
+- Course name
+- Class name
+- Enrolment date
+- Enrolment status
+- Start date if available
+- Teacher names if available and appropriate
+
+If no enrolment exists, show:
+
+```text
+No active enrolment recorded.
+```
+
+### Permissions/Consent Section
+
+Include a structured permissions and consent section.
+
+Recommended consent rows:
+
+- Emergency contact permission
+- Authorized pickup confirmation
+- Photo permission
+- Medical information confirmation
+- Parent communication consent
+- Terms and policies acknowledgement
+
+Each row should include:
+
+- Consent label
+- Yes/No or blank checkbox area
+- Optional notes line
+
+### Signature Section
+
+Include signature boxes near the end of the document.
+
+Signature boxes:
+
+- Parent/Guardian signature
+- Parent/Guardian printed name
+- Date
+- Management signature
+- Management printed name
+- Date
+
+The signature area should have enough white space for handwriting.
+
+### Footer
+
+The footer should appear on every page.
+
+Include:
+
+- Little London Play & Learn
+- Contact details if available
+- Page number
+- Confidentiality note
+
+Suggested footer text:
+
+```text
+Little London Play & Learn | Student Registration Form | Page {page_number}
+```
+
+## 4. Exact Fields To Include
+
+### Document Metadata
+
+- Document title
+- Generated date
+- Generated by role or system label if appropriate
+
+### Student Fields
+
+- Full name
+- Student number
+- Date of birth
+- Age
+- Gender if recorded
+- Primary language
+- School name
+- Optional student photo
+
+### Parent/Guardian Fields
+
+- Full name
+- Relationship type
+- Primary contact status
+- Phone
+- Alternate phone
+- Email
+- City
+- Preferred language if recorded
+
+### Emergency Contact Fields
+
+- Full name
+- Relationship
+- Phone
+- Alternate phone
+- Can pick up
+
+### Medical/Allergy Fields
+
+- Medical summary
+- Allergy summary
+- Care requirements that are approved for the selected version
+
+### Enrolment/Class Fields
+
+- Course name
+- Class name
+- Enrolment date
+- Enrolment status
+- Start date
+- End date if relevant
+- Teacher names where appropriate
+
+### Consent Fields
+
+- Emergency contact permission
+- Pickup authorization
+- Photo permission
+- Medical information confirmation
+- Parent communication consent
+- Policy acknowledgement
+
+### Signature Fields
+
+- Parent/Guardian signature
+- Parent/Guardian name
+- Parent/Guardian date
+- Management signature
+- Management name
+- Management date
+
+## 5. Fields To Exclude
+
+The PDF must exclude:
+
+- Internal notes
+- Audit fields
+- Database IDs
+- Deleted metadata
+- Archived metadata
+- Raw Supabase storage paths
+- Raw auth user IDs
+- Permission records
+- RLS helper data
+- Internal finance data
+- Internal management comments
+- System-only timestamps except generated date
+- Sensitive medical notes not approved for the selected version
+
+## 6. Visual Design
+
+### Logo Placement
+
+Use Little London Play & Learn branding.
+
+Recommended placement:
+
+- Top-left logo block
+- Coral circular bus icon
+- `LITTLE LONDON` in coral serif-style uppercase
+- `PLAY & LEARN` in sage uppercase letter spacing
+
+### Colours
+
+Use the approved palette:
+
+- Coral for accents and key section labels
+- Navy for primary text and headings
+- Sage green for calm dividers and secondary accents
+- Warm cream for background panels
+- Warm yellow for subtle highlights only
+- Soft border colour for section separation
+
+Avoid:
+
+- Dark navy hero panels
+- Blue ERP styling
+- Dense grey tables
+- Bright cartoon colours
+
+### Typography
+
+Typography should feel premium and readable.
+
+Recommended hierarchy:
+
+- Document title: bold navy
+- Section headings: coral or navy
+- Field labels: muted navy, small uppercase or semibold
+- Field values: navy
+- Helper notes: muted navy/grey
+
+### Spacing
+
+Use generous spacing.
+
+Guidelines:
+
+- Clear margins around page edges
+- Space between sections
+- Consistent row height
+- Avoid cramped tables
+- Keep signature areas open and readable
+
+### Tables/Cards
+
+Use soft card-like sections instead of heavy grid tables.
+
+Recommended section style:
+
+- Warm cream or white background
+- Soft border
+- Rounded corners where PDF rendering supports it
+- Coral or sage section label
+- Navy values
+
+For repeated records, such as multiple guardians, use simple rows or compact cards.
+
+### Signature Boxes
+
+Signature boxes should be:
+
+- Clearly labelled
+- Spacious
+- Bordered softly
+- Easy to print
+- Not filled with colour
+
+### Footer
+
+Footer should be subtle.
+
+Use:
+
+- Small text
+- Navy or muted navy
+- Thin sage or soft border divider
+- Page number
+
+## 7. A4 Print Rules
+
+### Page Size
+
+- A4 portrait
+
+### Margins
+
+Recommended:
+
+- Top: 16-20 mm
+- Bottom: 16-20 mm
+- Left: 14-18 mm
+- Right: 14-18 mm
+
+### Page Breaks
+
+Rules:
+
+- Do not split a student details card across pages.
+- Do not split signature boxes across pages.
+- Keep table headers with their rows.
+- Use page breaks before signature section if needed.
+- Footer must remain visible.
+
+### Black-And-White Readability
+
+The form must remain readable if printed in black and white.
+
+Rules:
+
+- Do not rely on colour alone.
+- Use labels, borders, and spacing.
+- Ensure contrast between text and background.
+- Avoid very pale text.
+
+## 8. Parent-Safe Version Vs Admin Version
+
+### Parent-Safe Version
+
+The parent-safe version can include:
+
+- Student basic details
+- Parent/guardian details for that family
+- Emergency contact details intended for confirmation
+- Parent-visible medical/allergy summary
+- Enrolment/class summary
+- Consent and signature section
+
+The parent-safe version must exclude:
+
+- Internal notes
+- Management-only medical notes
+- Audit fields
+- Deleted/archived metadata
+- Database IDs
+- Other family data
+- Staff-only comments
+
+### Admin Version
+
+The Admin version can include:
+
+- All parent-safe fields
+- Additional management-safe operational fields
+- Receives invoices indicator
+- Pickup permission indicators
+- More complete emergency contact summary
+- Management signature area
+
+The Admin version must still exclude:
+
+- Raw database IDs
+- Audit fields
+- Deleted/archived metadata
+- Raw auth or storage data
+- Unnecessary system metadata
+
+## 9. Email-Ready Text
+
+Subject:
+
+```text
+Little London Registration Form - {student_name}
+```
+
+Body:
+
+```text
+Bonjour {parent_name},
+Veuillez trouver ci-joint le formulaire d’inscription de {student_name}.
+Merci,
+Little London
+```
+
+## 10. WhatsApp-Ready Text
+
+```text
+Bonjour {parent_name}, veuillez trouver le formulaire d’inscription de {student_name}. Merci, Little London.
+```
+
+## 11. Success Criteria
+
+The registration form PDF design is successful when:
+
+- It follows Premium Boutique Dashboard v3 and Little London Play & Learn branding.
+- It uses warm cream, coral, sage, navy, and warm yellow consistently.
+- It is A4 print-ready.
+- It is professional, boutique, and parent-friendly.
+- It clearly presents student, parent, emergency, medical/allergy, and enrolment data.
+- It excludes internal notes, audit fields, database IDs, and archived/deleted metadata.
+- It supports parent-safe and Admin versions.
+- It includes clear consent and signature sections.
+- It can be downloaded, printed, emailed manually, and shared manually through WhatsApp.
+- It remains readable in black and white.
+- It is ready to guide implementation in a later build phase.

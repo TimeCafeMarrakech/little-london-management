@@ -2,11 +2,13 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Pencil } from "lucide-react";
 
+import { RegistrationFormActions } from "@/components/business-documents/registration-form-actions";
 import { StudentDetailSections } from "@/components/students/student-detail-sections";
 import { StudentStatusForm } from "@/components/students/student-status-form";
 import { Button } from "@/components/ui/button";
 import { updateStudentStatusAction } from "@/features/students/actions";
 import { requireUserProfile } from "@/lib/auth/session";
+import { getRegistrationFormEmail, getRegistrationFormWhatsAppMessage } from "@/services/business-documents/messages";
 import { canManageStudents, canReadStudentModule, getStudentDetail } from "@/services/students/student-service";
 
 export const dynamic = "force-dynamic";
@@ -16,6 +18,10 @@ type StudentDetailPageProps = {
     studentId: string;
   }>;
 };
+
+function formatRegistrationDate(value: string): string {
+  return new Intl.DateTimeFormat("en-GB", { day: "2-digit", month: "short", year: "numeric" }).format(new Date(value));
+}
 
 export default async function StudentDetailPage({ params }: StudentDetailPageProps) {
   const profile = await requireUserProfile();
@@ -38,6 +44,7 @@ export default async function StudentDetailPage({ params }: StudentDetailPagePro
 
   const canManage = canManageStudents(profile);
   const statusAction = updateStudentStatusAction.bind(null, student.id);
+  const registrationEmail = getRegistrationFormEmail(student);
 
   return (
     <div className="space-y-6">
@@ -62,6 +69,16 @@ export default async function StudentDetailPage({ params }: StudentDetailPagePro
       </section>
 
       {canManage ? <StudentStatusForm action={statusAction} student={student} /> : null}
+      {canManage ? (
+        <RegistrationFormActions
+          emailBody={registrationEmail.body}
+          emailSubject={registrationEmail.subject}
+          registrationDate={formatRegistrationDate(student.createdAt)}
+          studentId={student.id}
+          studentName={student.fullName}
+          whatsAppMessage={getRegistrationFormWhatsAppMessage(student)}
+        />
+      ) : null}
       <StudentDetailSections student={student} />
     </div>
   );
