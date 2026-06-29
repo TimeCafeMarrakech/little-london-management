@@ -1,9 +1,11 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { InvoicePdfActions } from "@/components/business-documents/invoice-pdf-actions";
 import { InvoiceArchiveForm } from "@/components/finance/invoice-archive-form";
 import { Button } from "@/components/ui/button";
 import { requireUserProfile } from "@/lib/auth/session";
+import { getInvoiceEmail, getInvoiceWhatsAppMessage } from "@/services/business-documents/messages";
 import { canManageFinance, getInvoiceDetail } from "@/services/finance/finance-service";
 
 export const dynamic = "force-dynamic";
@@ -35,6 +37,8 @@ export default async function InvoiceDetailPage({ params }: InvoiceDetailPagePro
     notFound();
   }
 
+  const invoiceEmail = getInvoiceEmail(invoice);
+
   return (
     <div className="space-y-6">
       <section className="rounded-lg border bg-card p-6 shadow-soft">
@@ -64,6 +68,14 @@ export default async function InvoiceDetailPage({ params }: InvoiceDetailPagePro
           </section>
         ))}
       </div>
+
+      <InvoicePdfActions
+        emailBody={invoiceEmail.body}
+        emailSubject={invoiceEmail.subject}
+        invoiceId={invoice.id}
+        invoiceNumber={invoice.invoiceNumber}
+        whatsAppMessage={getInvoiceWhatsAppMessage(invoice)}
+      />
 
       <section className="rounded-lg border bg-card p-5 shadow-soft">
         <h2 className="text-lg font-semibold">Invoice items</h2>
