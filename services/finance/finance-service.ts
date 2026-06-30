@@ -558,7 +558,18 @@ export async function recordPayment(profile: UserProfile, input: PaymentFormInpu
   });
 
   if (error) {
-    throw new Error(error.message);
+    console.error("[finance.recordPayment] record_payment_with_allocations failed", {
+      code: error.code,
+      message: error.message,
+      details: error.details,
+      hint: error.hint,
+      paymentMethod: input.paymentMethod,
+      allocationCount: input.allocations.length,
+      hasReferenceNumber: Boolean(input.referenceNumber),
+      hasNotes: Boolean(input.notes),
+    });
+
+    throw new Error([error.code, error.message, error.details, error.hint].filter(Boolean).join(" | "));
   }
 
   return data as string;

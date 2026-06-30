@@ -92,6 +92,18 @@ function errorState(error: unknown): FinanceActionState {
     return validationState("Choose a valid payment method.");
   }
 
+  if (message.includes("invalid_payment_amount")) {
+    return validationState("Payment amount must be greater than zero.");
+  }
+
+  if (message.includes("invalid_allocation_amount")) {
+    return validationState("Allocation amount must be greater than zero.");
+  }
+
+  if (message.includes("malformed_allocation_payload")) {
+    return validationState("The payment allocation details could not be read. Please choose an invoice and enter a valid allocation amount.");
+  }
+
   if (message.includes("due_date_before_issue_date")) {
     return validationState("Due date must be on or after the issue date.");
   }
@@ -110,6 +122,10 @@ function errorState(error: unknown): FinanceActionState {
 
   if (message.includes("invoice_not_allocatable")) {
     return validationState("Payments can only be allocated to issued or partially paid invoices for the selected parent and student.");
+  }
+
+  if (message.includes("record_payment_with_allocations") || message.includes("PGRST202") || message.includes("Could not find the function")) {
+    return validationState("The payment recording service needs to be updated. Please apply the latest finance database migration and try again.");
   }
 
   if (message.includes("duplicate key") || message.includes("unique")) {
