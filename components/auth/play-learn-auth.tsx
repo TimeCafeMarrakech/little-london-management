@@ -258,7 +258,7 @@ function MobileBrandSummary() {
 
 function LanguagePill() {
   return (
-    <div className="absolute right-6 top-12 hidden items-center gap-2 rounded-xl border border-[#D9E1E8] bg-white/70 px-4 py-2 text-sm font-medium text-[#17324A] shadow-sm md:flex">
+    <div className="absolute right-6 top-20 z-30 hidden items-center gap-2 rounded-xl border border-[#D9E1E8] bg-white/70 px-4 py-2 text-sm font-medium text-[#17324A] shadow-sm md:flex">
       <Globe2 className="h-4 w-4" aria-hidden="true" />
       English
       <ChevronDown className="h-4 w-4" aria-hidden="true" />
