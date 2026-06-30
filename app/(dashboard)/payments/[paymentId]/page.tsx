@@ -1,6 +1,8 @@
 import { notFound } from "next/navigation";
 
+import { ReceiptPdfActions } from "@/components/business-documents/receipt-pdf-actions";
 import { requireUserProfile } from "@/lib/auth/session";
+import { getReceiptEmail, getReceiptWhatsAppMessage } from "@/services/business-documents/messages";
 import { canManageFinance, getPaymentDetail } from "@/services/finance/finance-service";
 
 export const dynamic = "force-dynamic";
@@ -32,6 +34,8 @@ export default async function PaymentDetailPage({ params }: PaymentDetailPagePro
     notFound();
   }
 
+  const receiptEmail = getReceiptEmail(payment);
+
   return (
     <div className="space-y-6">
       <section className="rounded-lg border bg-card p-6 shadow-soft">
@@ -53,6 +57,14 @@ export default async function PaymentDetailPage({ params }: PaymentDetailPagePro
           </section>
         ))}
       </div>
+
+      <ReceiptPdfActions
+        emailBody={receiptEmail.body}
+        emailSubject={receiptEmail.subject}
+        paymentId={payment.id}
+        paymentNumber={payment.paymentNumber}
+        whatsAppMessage={getReceiptWhatsAppMessage(payment)}
+      />
 
       <section className="rounded-lg border bg-card p-5 shadow-soft">
         <h2 className="text-lg font-semibold">Allocations</h2>

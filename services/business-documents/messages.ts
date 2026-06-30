@@ -1,5 +1,5 @@
 import type { StudentDetail } from "@/features/students/types";
-import type { InvoiceDetail } from "@/features/finance/types";
+import type { InvoiceDetail, PaymentDetail } from "@/features/finance/types";
 
 function primaryParent(student: StudentDetail) {
   return student.parents.find((parent) => parent.isPrimaryContact) ?? student.parents[0] ?? null;
@@ -35,4 +35,19 @@ export function getInvoiceEmail(invoice: InvoiceDetail) {
 
 export function getInvoiceWhatsAppMessage(invoice: InvoiceDetail): string {
   return `Bonjour ${invoice.parentName}, veuillez trouver la facture ${invoice.invoiceNumber} pour ${invoice.studentName}. Total: ${formatMoney(invoice.total)}. Solde restant: ${formatMoney(invoice.balanceDue)}. Merci, Little London.`;
+}
+
+function formatPaymentMethod(value: string): string {
+  return value.replace(/_/g, " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
+}
+
+export function getReceiptEmail(payment: PaymentDetail) {
+  return {
+    subject: `Little London Receipt ${payment.paymentNumber} - ${payment.studentName}`,
+    body: `Bonjour ${payment.parentName},\nNous confirmons la r\u00e9ception de votre paiement de ${formatMoney(payment.amount)} pour ${payment.studentName}.\nMode de paiement: ${formatPaymentMethod(payment.paymentMethod)}.\nMerci,\nLittle London`,
+  };
+}
+
+export function getReceiptWhatsAppMessage(payment: PaymentDetail): string {
+  return `Bonjour ${payment.parentName}, nous confirmons la r\u00e9ception de votre paiement de ${formatMoney(payment.amount)} pour ${payment.studentName}. Mode de paiement: ${formatPaymentMethod(payment.paymentMethod)}. Merci, Little London.`;
 }
