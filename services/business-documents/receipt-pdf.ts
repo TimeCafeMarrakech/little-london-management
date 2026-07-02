@@ -2,27 +2,12 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import type { PaymentDetail, PaymentMethod } from "@/features/finance/types";
 import type { UserProfile } from "@/lib/auth/types";
-import { SimplePdfDocument, wrapText } from "@/lib/pdf/simple-pdf";
+import { SimplePdfDocument } from "@/lib/pdf/simple-pdf";
+import { formatBusinessDate as formatDate, formatMoney, displayValue as display, titleCase } from "@/services/business-documents/pdf-formatters";
+import { addBusinessDocumentFooter, addBusinessDocumentHeader, drawSectionTitle, drawSummaryCard, drawTableHeader, ensureDocumentSpace, type PdfContext } from "@/services/business-documents/pdf-layout";
+import { BUSINESS_DOCUMENT_COLORS as COLORS } from "@/services/business-documents/pdf-theme";
 import { canManageFinance, getPaymentDetail } from "@/services/finance/finance-service";
 import { createSupabaseServerClient } from "@/supabase/server";
-
-const COLORS = {
-  coral: "#F24A3A",
-  navy: "#0F2747",
-  sage: "#A8C3B0",
-  cream: "#FFF8EE",
-  gold: "#D6B36A",
-  border: "#EADFCF",
-  muted: "#5B6F82",
-  white: "#FFFFFF",
-};
-
-type PdfContext = {
-  doc: SimplePdfDocument;
-  page: ReturnType<SimplePdfDocument["addPage"]>;
-  y: number;
-  pageNumber: number;
-};
 
 type ParentContactRow = {
   id: string;
@@ -59,28 +44,8 @@ export type ReceiptDocumentData = PaymentDetail & {
   receiptAllocations: ReceiptAllocation[];
 };
 
-function formatDate(value: string | null | undefined): string {
-  if (!value) {
-    return "Not recorded";
-  }
-
-  return new Intl.DateTimeFormat("en-GB", { day: "2-digit", month: "short", year: "numeric" }).format(new Date(value));
-}
-
-function formatMoney(value: number): string {
-  return `${value.toLocaleString("en-GB", { maximumFractionDigits: 2, minimumFractionDigits: 2 })} MAD`;
-}
-
 function roundMoney(value: number): number {
   return Math.round(value * 100) / 100;
-}
-
-function titleCase(value: string): string {
-  return value.replace(/_/g, " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
-}
-
-function display(value: string | null | undefined): string {
-  return value && value.trim() ? value : "Not recorded";
 }
 
 function paymentMethodColor(method: PaymentMethod): string {
@@ -96,73 +61,43 @@ function paymentMethodColor(method: PaymentMethod): string {
 }
 
 function addFooter(ctx: PdfContext): void {
-  const { doc, page } = ctx;
-
-  doc.line(page, 42, 44, 553, 44, COLORS.border, 0.8);
-  doc.text(page, "Thank you for choosing Little London | Where Little Minds Grow | Mohammedia", 42, 30, 8.5, COLORS.muted);
-  doc.text(page, `Page ${ctx.pageNumber}`, 520, 30, 8.5, COLORS.muted);
-}
-
-function addBusLogo(ctx: PdfContext, cx: number, cy: number): void {
-  const { doc, page } = ctx;
-
-  doc.circle(page, cx, cy, 24, COLORS.coral);
-  doc.rect(page, cx - 14, cy - 7, 28, 17, COLORS.coral, COLORS.white);
-  doc.line(page, cx - 10, cy + 5, cx + 10, cy + 5, COLORS.white, 1);
-  doc.line(page, cx - 10, cy, cx + 10, cy, COLORS.white, 1);
-  doc.line(page, cx - 6, cy - 7, cx - 6, cy + 10, COLORS.white, 1);
-  doc.line(page, cx + 2, cy - 7, cx + 2, cy + 10, COLORS.white, 1);
-  doc.circle(page, cx - 7, cy - 9, 2.5, COLORS.white);
-  doc.circle(page, cx + 7, cy - 9, 2.5, COLORS.white);
+  addBusinessDocumentFooter(ctx, {
+    text: "Thank you for choosing Little London | Where Little Minds Grow | Mohammedia",
+  });
 }
 
 function addHeader(ctx: PdfContext, receipt: ReceiptDocumentData): void {
-  const { doc, page } = ctx;
-
-  doc.rect(page, 0, 0, doc.width, doc.height, COLORS.white);
-  doc.rect(page, 0, 736, doc.width, 106, COLORS.cream);
-  addBusLogo(ctx, 62, 792);
-  doc.text(page, "LITTLE LONDON", 96, 805, 16, COLORS.coral, "bold");
-  doc.text(page, "PLAY & LEARN", 98, 787, 9.5, COLORS.sage, "bold");
-  doc.text(page, "Where Little Minds Grow", 98, 769, 10, COLORS.muted);
-
-  doc.text(page, "Little London Receipt", 318, 803, 12.5, COLORS.navy, "bold");
-  doc.text(page, receipt.paymentNumber, 318, 784, 10.5, COLORS.muted);
-  doc.text(page, `Payment Date: ${formatDate(receipt.paymentDate)}`, 318, 768, 8.7, COLORS.muted);
-  doc.rect(page, 468, 794, 82, 18, COLORS.sage, COLORS.sage);
-  doc.text(page, "Received", 480, 800, 8, COLORS.navy, "bold");
-  doc.line(page, 42, 734, 553, 734, COLORS.coral, 2);
-  ctx.y = 690;
+  addBusinessDocumentHeader(ctx, {
+    title: "Little London Receipt",
+    metaLines: [receipt.paymentNumber, `Payment Date: ${formatDate(receipt.paymentDate)}`],
+    metaSizes: [10.5, 8.7],
+    metaGap: 16,
+    badge: {
+      label: "Received",
+      x: 468,
+      y: 794,
+      width: 82,
+      fill: COLORS.sage,
+      textColor: COLORS.navy,
+    },
+  });
 }
 
 function ensureSpace(ctx: PdfContext, needed: number, receipt: ReceiptDocumentData): void {
-  if (ctx.y - needed > 70) {
-    return;
-  }
-
-  addFooter(ctx);
-  ctx.page = ctx.doc.addPage();
-  ctx.pageNumber += 1;
-  addHeader(ctx, receipt);
+  ensureDocumentSpace(ctx, needed, () => {
+    addFooter(ctx);
+    ctx.page = ctx.doc.addPage();
+    ctx.pageNumber += 1;
+    addHeader(ctx, receipt);
+  });
 }
 
 function sectionTitle(ctx: PdfContext, title: string): void {
-  ctx.doc.text(ctx.page, title, 46, ctx.y, 13, COLORS.coral, "bold");
-  ctx.y -= 18;
+  drawSectionTitle(ctx, title);
 }
 
 function summaryCard(ctx: PdfContext, x: number, y: number, width: number, height: number, title: string, rows: Array<[string, string]>): void {
-  ctx.doc.rect(ctx.page, x, y - height, width, height, COLORS.cream, COLORS.border);
-  ctx.doc.text(ctx.page, title, x + 12, y - 18, 10.5, COLORS.navy, "bold");
-  let rowY = y - 44;
-
-  rows.forEach(([label, value]) => {
-    ctx.doc.text(ctx.page, label, x + 12, rowY, 7.8, COLORS.muted, "bold");
-    wrapText(value, width - 24, 9.3).slice(0, 2).forEach((line, index) => {
-      ctx.doc.text(ctx.page, line, x + 12, rowY - 12 - index * 10, 9.3, COLORS.navy);
-    });
-    rowY -= 42;
-  });
+  drawSummaryCard(ctx, x, y, width, height, title, rows);
 }
 
 function addRecipientCards(ctx: PdfContext, receipt: ReceiptDocumentData): void {
@@ -209,10 +144,11 @@ function addAllocationSummary(ctx: PdfContext, receipt: ReceiptDocumentData): vo
   sectionTitle(ctx, "Linked Invoice Allocation");
 
   const tableX = 42;
-  ctx.doc.rect(ctx.page, tableX, ctx.y - 24, 511, 28, COLORS.cream, COLORS.border);
-  ctx.doc.text(ctx.page, "Invoice", tableX + 10, ctx.y - 13, 8.3, COLORS.muted, "bold");
-  ctx.doc.text(ctx.page, "Amount Allocated", tableX + 245, ctx.y - 13, 8.3, COLORS.muted, "bold");
-  ctx.doc.text(ctx.page, "Remaining Balance", tableX + 380, ctx.y - 13, 8.3, COLORS.muted, "bold");
+  drawTableHeader(ctx, tableX, ctx.y, [
+    { label: "Invoice", x: tableX + 10 },
+    { label: "Amount Allocated", x: tableX + 245 },
+    { label: "Remaining Balance", x: tableX + 380 },
+  ]);
   ctx.y -= 28;
 
   if (receipt.receiptAllocations.length === 0) {

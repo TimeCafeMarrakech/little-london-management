@@ -1,98 +1,40 @@
 import type { StudentDetail } from "@/features/students/types";
 import { SimplePdfDocument, wrapText } from "@/lib/pdf/simple-pdf";
-
-const COLORS = {
-  coral: "#F24A3A",
-  navy: "#0F2747",
-  sage: "#A8C3B0",
-  mint: "#BFE2D0",
-  cream: "#FFF8EE",
-  gold: "#D6B36A",
-  border: "#EADFCF",
-  muted: "#5B6F82",
-  white: "#FFFFFF",
-};
-
-type PdfContext = {
-  doc: SimplePdfDocument;
-  page: ReturnType<SimplePdfDocument["addPage"]>;
-  y: number;
-  pageNumber: number;
-};
-
-function formatDate(value: string | null | undefined): string {
-  if (!value) {
-    return "Not recorded";
-  }
-
-  return new Intl.DateTimeFormat("en-GB", { day: "2-digit", month: "short", year: "numeric" }).format(new Date(value));
-}
-
-function display(value: string | number | boolean | null | undefined): string {
-  if (typeof value === "boolean") {
-    return value ? "Yes" : "No";
-  }
-
-  if (value === null || value === undefined || value === "") {
-    return "Not recorded";
-  }
-
-  return String(value);
-}
-
-function titleCase(value: string | null | undefined): string {
-  if (!value) {
-    return "Not recorded";
-  }
-
-  return value.replace(/_/g, " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
-}
+import { formatBusinessDate as formatDate, displayValue as display, titleCase } from "@/services/business-documents/pdf-formatters";
+import { addBusinessDocumentFooter, addBusinessDocumentHeader, drawSectionTitle, ensureDocumentSpace, type PdfContext } from "@/services/business-documents/pdf-layout";
+import { BUSINESS_DOCUMENT_COLORS as COLORS } from "@/services/business-documents/pdf-theme";
 
 function addFooter(ctx: PdfContext): void {
-  const { doc, page } = ctx;
-
-  doc.line(page, 42, 44, 553, 44, COLORS.border, 0.8);
-  doc.text(page, "Little London Play & Learn | Student Registration Form", 42, 28, 8.5, COLORS.muted);
-  doc.text(page, `Page ${ctx.pageNumber}`, 520, 28, 8.5, COLORS.muted);
+  addBusinessDocumentFooter(ctx, {
+    text: "Little London Play & Learn | Student Registration Form",
+    textY: 28,
+    pageNumberY: 28,
+  });
 }
 
 function addHeader(ctx: PdfContext, student: StudentDetail): void {
-  const { doc, page } = ctx;
-
-  doc.rect(page, 0, 0, doc.width, doc.height, COLORS.white);
-  doc.rect(page, 0, 736, doc.width, 106, COLORS.cream);
-  doc.circle(page, 62, 792, 24, COLORS.coral);
-  doc.rect(page, 48, 785, 28, 17, COLORS.coral, COLORS.white);
-  doc.line(page, 52, 797, 72, 797, COLORS.white, 1);
-  doc.line(page, 52, 792, 72, 792, COLORS.white, 1);
-  doc.line(page, 56, 785, 56, 802, COLORS.white, 1);
-  doc.line(page, 64, 785, 64, 802, COLORS.white, 1);
-  doc.circle(page, 55, 783, 2.5, COLORS.white);
-  doc.circle(page, 69, 783, 2.5, COLORS.white);
-  doc.text(page, "LITTLE LONDON", 96, 805, 16, COLORS.coral, "bold");
-  doc.text(page, "PLAY & LEARN", 98, 787, 9.5, COLORS.sage, "bold");
-  doc.text(page, "Where Little Minds Grow", 98, 769, 10, COLORS.muted);
-
-  doc.text(page, "Student Registration Form", 332, 799, 12.5, COLORS.navy, "bold");
-  doc.text(page, `Registration Date: ${formatDate(student.createdAt)}`, 332, 778, 9.5, COLORS.muted);
-  doc.line(page, 42, 734, 553, 734, COLORS.coral, 2);
-  ctx.y = 676;
+  addBusinessDocumentHeader(ctx, {
+    title: "Student Registration Form",
+    metaLines: [`Registration Date: ${formatDate(student.createdAt)}`],
+    titleX: 332,
+    titleY: 799,
+    metaStartY: 778,
+    metaSize: 9.5,
+    afterY: 676,
+  });
 }
 
 function ensureSpace(ctx: PdfContext, needed: number, student: StudentDetail): void {
-  if (ctx.y - needed > 70) {
-    return;
-  }
-
-  addFooter(ctx);
-  ctx.page = ctx.doc.addPage();
-  ctx.pageNumber += 1;
-  addHeader(ctx, student);
+  ensureDocumentSpace(ctx, needed, () => {
+    addFooter(ctx);
+    ctx.page = ctx.doc.addPage();
+    ctx.pageNumber += 1;
+    addHeader(ctx, student);
+  });
 }
 
 function sectionTitle(ctx: PdfContext, title: string): void {
-  ctx.doc.text(ctx.page, title, 46, ctx.y, 13, COLORS.coral, "bold");
-  ctx.y -= 15;
+  drawSectionTitle(ctx, title, 15);
 }
 
 function keyValueGrid(ctx: PdfContext, items: Array<[string, string]>, columns = 2): void {
@@ -120,7 +62,7 @@ function card(ctx: PdfContext, height: number): void {
   ctx.doc.rect(ctx.page, 42, ctx.y - height + 8, 511, height, COLORS.cream, COLORS.border);
 }
 
-function paragraph(ctx: PdfContext, text: string, x: number, width: number, color = COLORS.navy, size = 9.5): number {
+function paragraph(ctx: PdfContext, text: string, x: number, width: number, color: string = COLORS.navy, size = 9.5): number {
   const lines = wrapText(text, width, size);
 
   lines.forEach((line, index) => {

@@ -1,5 +1,6 @@
 import type { StudentDetail } from "@/features/students/types";
 import type { InvoiceDetail, PaymentDetail } from "@/features/finance/types";
+import { formatMoney, formatPaymentMethod } from "@/services/business-documents/pdf-formatters";
 
 function primaryParent(student: StudentDetail) {
   return student.parents.find((parent) => parent.isPrimaryContact) ?? student.parents[0] ?? null;
@@ -22,10 +23,6 @@ export function getRegistrationFormWhatsAppMessage(student: StudentDetail): stri
   return `Bonjour ${parentName}, veuillez trouver le formulaire d'inscription de ${student.fullName}. Merci, Little London.`;
 }
 
-function formatMoney(value: number): string {
-  return `${value.toLocaleString("en-GB", { maximumFractionDigits: 2, minimumFractionDigits: 2 })} MAD`;
-}
-
 export function getInvoiceEmail(invoice: InvoiceDetail) {
   return {
     subject: `Little London Invoice ${invoice.invoiceNumber} - ${invoice.studentName}`,
@@ -35,10 +32,6 @@ export function getInvoiceEmail(invoice: InvoiceDetail) {
 
 export function getInvoiceWhatsAppMessage(invoice: InvoiceDetail): string {
   return `Bonjour ${invoice.parentName}, veuillez trouver la facture ${invoice.invoiceNumber} pour ${invoice.studentName}. Total: ${formatMoney(invoice.total)}. Solde restant: ${formatMoney(invoice.balanceDue)}. Merci, Little London.`;
-}
-
-function formatPaymentMethod(value: string): string {
-  return value.replace(/_/g, " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
 }
 
 export function getReceiptEmail(payment: PaymentDetail) {
