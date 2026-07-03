@@ -3,9 +3,10 @@ import { notFound } from "next/navigation";
 import { Pencil } from "lucide-react";
 
 import { ParentDetailSections } from "@/components/parents/parent-detail-sections";
+import { ParentPortalAccountCard } from "@/components/parents/parent-portal-account-card";
 import { ParentStatusForm } from "@/components/parents/parent-status-form";
 import { Button } from "@/components/ui/button";
-import { updateParentStatusAction } from "@/features/parents/actions";
+import { disableParentPortalAction, enableParentPortalAction, inviteParentToPortalAction, resetParentPortalPasswordAction, updateParentStatusAction } from "@/features/parents/actions";
 import { requireUserProfile } from "@/lib/auth/session";
 import { canManageParents, canReadParentModule, getParentDetail } from "@/services/parents/parent-service";
 
@@ -38,6 +39,10 @@ export default async function ParentDetailPage({ params }: ParentDetailPageProps
 
   const canManage = canManageParents(profile);
   const statusAction = updateParentStatusAction.bind(null, parent.id);
+  const inviteAction = inviteParentToPortalAction.bind(null, parent.id);
+  const resetPasswordAction = resetParentPortalPasswordAction.bind(null, parent.id);
+  const enablePortalAction = enableParentPortalAction.bind(null, parent.id);
+  const disablePortalAction = disableParentPortalAction.bind(null, parent.id);
 
   return (
     <div className="space-y-6">
@@ -62,6 +67,15 @@ export default async function ParentDetailPage({ params }: ParentDetailPageProps
       </section>
 
       {canManage ? <ParentStatusForm action={statusAction} parent={parent} /> : null}
+      {canManage ? (
+        <ParentPortalAccountCard
+          parent={parent}
+          inviteAction={inviteAction}
+          resetPasswordAction={resetPasswordAction}
+          enableAction={enablePortalAction}
+          disableAction={disablePortalAction}
+        />
+      ) : null}
       <ParentDetailSections parent={parent} />
     </div>
   );

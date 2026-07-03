@@ -14,7 +14,11 @@ import type { ParentActionState } from "@/features/parents/types";
 import { requireUserProfile } from "@/lib/auth/session";
 import {
   createParent,
+  disableParentPortalAccess,
+  enableParentPortalAccess,
+  inviteParentToPortal,
   linkStudentToParent,
+  sendParentPortalPasswordReset,
   unlinkStudentFromParent,
   updateParent,
   updateParentStatus,
@@ -52,6 +56,38 @@ function errorState(error: unknown): ParentActionState {
 
   if (message === "student_not_found") {
     return validationState("Student profile could not be found or is archived.");
+  }
+
+  if (message === "parent_archived") {
+    return validationState("Archived parents cannot use portal access.");
+  }
+
+  if (message === "parent_inactive") {
+    return validationState("Only active parents can use portal access.");
+  }
+
+  if (message === "parent_email_required") {
+    return validationState("Add a parent email address before managing portal access.");
+  }
+
+  if (message === "portal_account_missing") {
+    return validationState("Create or invite the portal account before using this action.");
+  }
+
+  if (message === "parent_role_missing") {
+    return validationState("The Parent role is missing or inactive in Supabase.");
+  }
+
+  if (message === "supabase_admin_not_configured") {
+    return validationState("Supabase service role access is not configured. Add SUPABASE_SERVICE_ROLE_KEY before inviting portal users.");
+  }
+
+  if (message === "portal_auth_lookup_failed") {
+    return validationState("Unable to verify the parent portal account in Supabase Auth. Please try again or check Supabase Auth configuration.");
+  }
+
+  if (message === "portal_invitation_failed") {
+    return validationState("Unable to send the parent portal invitation. Please check the parent email and Supabase Auth email settings.");
   }
 
   if (message.includes("duplicate key") || message.includes("unique")) {
@@ -193,6 +229,77 @@ export async function unlinkStudentFromParentAction(_previousState: ParentAction
     return {
       success: true,
       message: "Student unlinked from parent.",
+    };
+  } catch (error) {
+    return errorState(error);
+  }
+}
+
+export async function inviteParentToPortalAction(parentId: string, _previousState: ParentActionState): Promise<ParentActionState> {
+  void _previousState;
+
+  try {
+    const profile = await requireUserProfile();
+    await inviteParentToPortal(profile, parentId);
+    revalidatePath("/parents");
+    revalidatePath(`/parents/${parentId}`);
+
+    return {
+      success: true,
+      message: "Parent portal invitation sent and account linked.",
+    };
+  } catch (error) {
+    return errorState(error);
+  }
+}
+
+export async function resetParentPortalPasswordAction(parentId: string, _previousState: ParentActionState): Promise<ParentActionState> {
+  void _previousState;
+
+  try {
+    const profile = await requireUserProfile();
+    await sendParentPortalPasswordReset(profile, parentId);
+    revalidatePath(`/parents/${parentId}`);
+
+    return {
+      success: true,
+      message: "Password reset email sent.",
+    };
+  } catch (error) {
+    return errorState(error);
+  }
+}
+
+export async function enableParentPortalAction(parentId: string, _previousState: ParentActionState): Promise<ParentActionState> {
+  void _previousState;
+
+  try {
+    const profile = await requireUserProfile();
+    await enableParentPortalAccess(profile, parentId);
+    revalidatePath("/parents");
+    revalidatePath(`/parents/${parentId}`);
+
+    return {
+      success: true,
+      message: "Parent portal access enabled.",
+    };
+  } catch (error) {
+    return errorState(error);
+  }
+}
+
+export async function disableParentPortalAction(parentId: string, _previousState: ParentActionState): Promise<ParentActionState> {
+  void _previousState;
+
+  try {
+    const profile = await requireUserProfile();
+    await disableParentPortalAccess(profile, parentId);
+    revalidatePath("/parents");
+    revalidatePath(`/parents/${parentId}`);
+
+    return {
+      success: true,
+      message: "Parent portal access disabled.",
     };
   } catch (error) {
     return errorState(error);

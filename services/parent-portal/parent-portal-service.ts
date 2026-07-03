@@ -14,11 +14,20 @@ import type {
 } from "@/features/parent-portal/types";
 import { hasAnyPermission } from "@/lib/auth/permissions";
 import type { UserProfile } from "@/lib/auth/types";
+import { createSupabaseAdminClient } from "@/supabase/admin";
 import { createSupabaseServerClient } from "@/supabase/server";
 
 type ParentRow = {
   id: string;
   full_name: string;
+};
+
+type ParentPortalAccountRow = {
+  id: string;
+  full_name: string;
+  portal_status: "not_invited" | "invited" | "active" | "disabled";
+  status: "active" | "inactive" | "archived";
+  deleted_at: string | null;
 };
 
 type RelationshipRow = {
@@ -159,21 +168,39 @@ function byId<TRow extends { id: string }>(rows: TRow[]): Map<string, TRow> {
 }
 
 async function getParent(profile: UserProfile): Promise<ParentRow | null> {
+  return assertParentPortalAccess(profile);
+}
+
+export async function assertParentPortalAccess(profile: UserProfile): Promise<ParentRow | null> {
   if (!canReadParentPortal(profile)) {
     throw new Error("forbidden");
   }
 
-  const supabase = await createParentPortalSupabaseClient();
+  const supabase = createSupabaseAdminClient();
   const { data, error } = await supabase
-    .from("parent_portal_parents")
-    .select("id, full_name")
+    .from("parents")
+    .select("id, full_name, portal_status, status, deleted_at")
+    .eq("user_id", profile.id)
     .maybeSingle();
 
   if (error) {
     throw new Error(error.message);
   }
 
-  return data as ParentRow | null;
+  if (!data) {
+    return null;
+  }
+
+  const parent = data as ParentPortalAccountRow;
+
+  if (parent.deleted_at || parent.status !== "active" || parent.portal_status !== "active") {
+    throw new Error("parent_portal_disabled");
+  }
+
+  return {
+    id: parent.id,
+    full_name: parent.full_name,
+  };
 }
 
 async function getRelationships(parentId: string): Promise<RelationshipRow[]> {

@@ -37,6 +37,15 @@ export type ParentListItem = {
 };
 
 export type ParentDetail = ParentListItem & {
+  userId: string | null;
+  portalAccount: {
+    userId: string | null;
+    linkedUserEmail: string | null;
+    linkedUserFullName: string | null;
+    linkedUserStatus: "pending" | "active" | "suspended" | "disabled" | "archived" | null;
+    lastInvitationAt: string | null;
+    lastLoginAt: string | null;
+  };
   addressLine1: string | null;
   addressLine2: string | null;
   country: string;

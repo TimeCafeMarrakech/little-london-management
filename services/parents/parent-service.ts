@@ -3,6 +3,8 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { hasAnyPermission, hasPermission, hasRole } from "@/lib/auth/permissions";
 import type { UserProfile } from "@/lib/auth/types";
+import { getPublicEnv } from "@/lib/env";
+import { createSupabaseAdminClient } from "@/supabase/admin";
 import { createSupabaseServerClient } from "@/supabase/server";
 import { getParentBillingSummary } from "@/services/finance/finance-service";
 import type {
@@ -24,6 +26,7 @@ import type {
 
 type ParentRow = {
   id: string;
+  user_id: string | null;
   first_name: string;
   last_name: string;
   full_name: string;
@@ -39,6 +42,23 @@ type ParentRow = {
   status: "active" | "inactive" | "archived";
   created_at: string;
   updated_at: string;
+};
+
+type ParentPortalAccountRow = Pick<ParentRow, "id" | "user_id" | "full_name" | "email" | "phone" | "portal_status" | "status"> & {
+  deleted_at: string | null;
+};
+
+type UserProfileSummaryRow = {
+  id: string;
+  full_name: string;
+  email: string;
+  status: "pending" | "active" | "suspended" | "disabled" | "archived";
+  last_login_at: string | null;
+};
+
+type ParentAuthUser = {
+  id: string;
+  email?: string;
 };
 
 type RelationshipRow = {
@@ -245,7 +265,7 @@ export async function getParentDetail(profile: UserProfile, parentId: string): P
   const supabase = await createParentSupabaseClient();
   const { data, error } = await supabase
     .from("parents")
-    .select("id, first_name, last_name, full_name, email, phone, alternate_phone, address_line_1, address_line_2, city, country, preferred_language, portal_status, status, created_at, updated_at")
+    .select("id, user_id, first_name, last_name, full_name, email, phone, alternate_phone, address_line_1, address_line_2, city, country, preferred_language, portal_status, status, created_at, updated_at")
     .eq("id", parentId)
     .maybeSingle();
 
@@ -258,14 +278,24 @@ export async function getParentDetail(profile: UserProfile, parentId: string): P
   }
 
   const row = data as ParentRow;
-  const [linkedStudents, availableStudents, billingSummary] = await Promise.all([
+  const [linkedStudents, availableStudents, billingSummary, portalAccount] = await Promise.all([
     getLinkedStudents(parentId),
     getAvailableStudentsForParent(parentId),
     getParentBillingSummary(profile, parentId),
+    getParentPortalAccountSummary(row.user_id),
   ]);
 
   return {
     ...toParentListItem(row, new Map([[parentId, linkedStudents.length]])),
+    userId: row.user_id,
+    portalAccount: {
+      userId: row.user_id,
+      linkedUserEmail: portalAccount?.email ?? null,
+      linkedUserFullName: portalAccount?.full_name ?? null,
+      linkedUserStatus: portalAccount?.status ?? null,
+      lastInvitationAt: null,
+      lastLoginAt: portalAccount?.last_login_at ?? null,
+    },
     addressLine1: row.address_line_1,
     addressLine2: row.address_line_2,
     country: row.country,
@@ -275,6 +305,338 @@ export async function getParentDetail(profile: UserProfile, parentId: string): P
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
+}
+
+async function getParentPortalAccountSummary(userId: string | null): Promise<UserProfileSummaryRow | null> {
+  if (!userId) {
+    return null;
+  }
+
+  const supabase = await createParentSupabaseClient();
+  const { data, error } = await supabase
+    .from("user_profiles")
+    .select("id, full_name, email, status, last_login_at")
+    .eq("id", userId)
+    .maybeSingle();
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return data as UserProfileSummaryRow | null;
+}
+
+async function getParentForPortalAction(parentId: string): Promise<ParentPortalAccountRow> {
+  const supabase = await createParentSupabaseClient();
+  const { data, error } = await supabase
+    .from("parents")
+    .select("id, user_id, full_name, email, phone, portal_status, status, deleted_at")
+    .eq("id", parentId)
+    .maybeSingle();
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  if (!data) {
+    throw new Error("parent_not_found");
+  }
+
+  return data as ParentPortalAccountRow;
+}
+
+function assertParentCanUsePortal(parent: ParentPortalAccountRow): void {
+  if (parent.deleted_at || parent.status === "archived") {
+    throw new Error("parent_archived");
+  }
+
+  if (parent.status !== "active") {
+    throw new Error("parent_inactive");
+  }
+
+  if (!parent.email) {
+    throw new Error("parent_email_required");
+  }
+}
+
+async function getParentRoleId(): Promise<string> {
+  const supabase = createSupabaseAdminClient();
+  const { data, error } = await supabase
+    .from("roles")
+    .select("id")
+    .eq("name", "parent")
+    .eq("status", "active")
+    .maybeSingle();
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  if (!data) {
+    throw new Error("parent_role_missing");
+  }
+
+  return data.id;
+}
+
+function normalizeEmail(email: string): string {
+  return email.trim().toLowerCase();
+}
+
+function logPortalInviteIssue(message: string, details: Record<string, unknown>): void {
+  console.error("[parent-portal-invite]", message, details);
+}
+
+async function getVerifiedAuthUserById(
+  supabase: ReturnType<typeof createSupabaseAdminClient>,
+  parent: ParentPortalAccountRow,
+): Promise<ParentAuthUser | null> {
+  if (!parent.user_id || !parent.email) {
+    return null;
+  }
+
+  const { data, error } = await supabase.auth.admin.getUserById(parent.user_id);
+
+  if (error || !data.user) {
+    logPortalInviteIssue("Linked parent user_id does not resolve to a Supabase Auth user.", {
+      parentId: parent.id,
+      userId: parent.user_id,
+      errorCode: error?.code,
+      errorName: error?.name,
+    });
+
+    return null;
+  }
+
+  if (normalizeEmail(data.user.email ?? "") !== normalizeEmail(parent.email)) {
+    logPortalInviteIssue("Linked parent user_id belongs to a different email address.", {
+      parentId: parent.id,
+      userId: parent.user_id,
+      authEmail: data.user.email,
+      parentEmail: parent.email,
+    });
+
+    return null;
+  }
+
+  return {
+    id: data.user.id,
+    email: data.user.email,
+  };
+}
+
+async function findAuthUserByEmail(
+  supabase: ReturnType<typeof createSupabaseAdminClient>,
+  email: string,
+): Promise<ParentAuthUser | null> {
+  let page = 1;
+  const normalizedEmail = normalizeEmail(email);
+
+  while (page <= 10) {
+    const { data, error } = await supabase.auth.admin.listUsers({ page, perPage: 100 });
+
+    if (error) {
+      logPortalInviteIssue("Unable to search Supabase Auth users by email.", {
+        email,
+        errorCode: error.code,
+        errorName: error.name,
+      });
+
+      throw new Error("portal_auth_lookup_failed");
+    }
+
+    const match = data.users.find((user) => normalizeEmail(user.email ?? "") === normalizedEmail);
+
+    if (match) {
+      return {
+        id: match.id,
+        email: match.email,
+      };
+    }
+
+    if (data.users.length < 100) {
+      return null;
+    }
+
+    page += 1;
+  }
+
+  return null;
+}
+
+async function upsertParentUserProfile(parent: ParentPortalAccountRow, userId: string, actor: UserProfile): Promise<void> {
+  const supabase = createSupabaseAdminClient();
+  const parentRoleId = await getParentRoleId();
+  const { error } = await supabase
+    .from("user_profiles")
+    .upsert({
+      id: userId,
+      branch_id: actor.branchId,
+      role_id: parentRoleId,
+      full_name: parent.full_name,
+      email: parent.email ?? "",
+      phone: parent.phone,
+      status: "active",
+      updated_by: actor.id,
+    } as never, { onConflict: "id" });
+
+  if (error) {
+    throw new Error(error.message);
+  }
+}
+
+export async function inviteParentToPortal(profile: UserProfile, parentId: string): Promise<void> {
+  if (!canManageParents(profile)) {
+    throw new Error("forbidden");
+  }
+
+  const parent = await getParentForPortalAction(parentId);
+  assertParentCanUsePortal(parent);
+
+  const supabase = createSupabaseAdminClient();
+  const { appUrl } = getPublicEnv();
+  let authUser = await getVerifiedAuthUserById(supabase, parent);
+  let reusedExistingAuthUser = Boolean(authUser);
+  let invitationSent = false;
+
+  if (!authUser) {
+    authUser = await findAuthUserByEmail(supabase, parent.email ?? "");
+    reusedExistingAuthUser = Boolean(authUser);
+  }
+
+  if (!authUser) {
+    const { data, error } = await supabase.auth.admin.inviteUserByEmail(parent.email ?? "", {
+      data: {
+        full_name: parent.full_name,
+        role: "parent",
+      },
+      redirectTo: `${appUrl ?? "http://localhost:3000"}/reset-password`,
+    });
+
+    if (error) {
+      logPortalInviteIssue("Supabase Auth invitation failed.", {
+        parentId: parent.id,
+        email: parent.email,
+        errorCode: error.code,
+        errorName: error.name,
+      });
+
+      throw new Error("portal_invitation_failed");
+    }
+
+    authUser = data.user ? { id: data.user.id, email: data.user.email } : null;
+    invitationSent = true;
+  }
+
+  if (!authUser) {
+    logPortalInviteIssue("Supabase Auth invitation did not return a user.", {
+      parentId: parent.id,
+      email: parent.email,
+    });
+
+    throw new Error("portal_invitation_failed");
+  }
+
+  await upsertParentUserProfile(parent, authUser.id, profile);
+
+  const parentSupabase = await createParentSupabaseClient();
+  const { error: parentError } = await parentSupabase
+    .from("parents")
+    .update({
+      user_id: authUser.id,
+      portal_status: "invited",
+      updated_by: profile.id,
+    })
+    .eq("id", parent.id);
+
+  if (parentError) {
+    throw new Error(parentError.message);
+  }
+
+  if (!invitationSent && reusedExistingAuthUser) {
+    await sendParentPortalPasswordReset(profile, parent.id);
+  }
+}
+
+export async function sendParentPortalPasswordReset(profile: UserProfile, parentId: string): Promise<void> {
+  if (!canManageParents(profile)) {
+    throw new Error("forbidden");
+  }
+
+  const parent = await getParentForPortalAction(parentId);
+
+  if (!parent.email) {
+    throw new Error("parent_email_required");
+  }
+
+  if (!parent.user_id) {
+    throw new Error("portal_account_missing");
+  }
+
+  const supabase = await createSupabaseServerClient();
+  const { appUrl } = getPublicEnv();
+  const { error } = await supabase.auth.resetPasswordForEmail(parent.email, {
+    redirectTo: `${appUrl ?? "http://localhost:3000"}/reset-password`,
+  });
+
+  if (error) {
+    throw new Error(error.message);
+  }
+}
+
+export async function enableParentPortalAccess(profile: UserProfile, parentId: string): Promise<void> {
+  if (!canManageParents(profile)) {
+    throw new Error("forbidden");
+  }
+
+  const parent = await getParentForPortalAction(parentId);
+
+  if (!parent.user_id) {
+    throw new Error("portal_account_missing");
+  }
+
+  assertParentCanUsePortal(parent);
+  const admin = createSupabaseAdminClient();
+
+  const supabase = await createParentSupabaseClient();
+  const { error } = await supabase
+    .from("parents")
+    .update({
+      portal_status: "active",
+      updated_by: profile.id,
+    })
+    .eq("id", parentId);
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  await admin.from("user_profiles").update({ status: "active", updated_by: profile.id } as never).eq("id", parent.user_id);
+}
+
+export async function disableParentPortalAccess(profile: UserProfile, parentId: string): Promise<void> {
+  if (!canManageParents(profile)) {
+    throw new Error("forbidden");
+  }
+
+  const parent = await getParentForPortalAction(parentId);
+  const admin = parent.user_id ? createSupabaseAdminClient() : null;
+  const supabase = await createParentSupabaseClient();
+  const { error } = await supabase
+    .from("parents")
+    .update({
+      portal_status: "disabled",
+      updated_by: profile.id,
+    })
+    .eq("id", parentId);
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  if (parent.user_id) {
+    await admin?.from("user_profiles").update({ status: "disabled", updated_by: profile.id } as never).eq("id", parent.user_id);
+  }
 }
 
 async function getLinkedStudents(parentId: string): Promise<LinkedStudentSummary[]> {
