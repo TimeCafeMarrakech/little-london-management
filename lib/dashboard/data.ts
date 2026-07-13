@@ -18,6 +18,7 @@ import {
   UserRoundCheck,
   Users,
   WalletCards,
+  ReceiptText,
 } from "lucide-react";
 import type { ComponentType } from "react";
 
@@ -74,6 +75,7 @@ export const roleNavigation: Record<UserRole, NavigationItem[]> = {
     { label: "Attendance", description: "Daily attendance", icon: ClipboardCheck, href: "/attendance" },
     { label: "Invoices", description: "Billing and balances", icon: WalletCards, href: "/invoices" },
     { label: "Payments", description: "Payment history", icon: CreditCard, href: "/payments" },
+    { label: "Cashbook", description: "Daily income records", icon: ReceiptText, href: "/cashbook" },
     { label: "Events", description: "Workshops and camps", icon: CalendarDays, href: "/events" },
     { label: "Reports", description: "Insights and analytics", icon: BarChart3, href: "/reports" },
     { label: "Settings", description: "System and access", icon: ShieldCheck, disabled: true },
@@ -88,6 +90,7 @@ export const roleNavigation: Record<UserRole, NavigationItem[]> = {
     { label: "Attendance", description: "Daily attendance view", icon: ClipboardCheck, href: "/attendance" },
     { label: "Invoices", description: "Billing and balances", icon: CreditCard, href: "/invoices" },
     { label: "Payments", description: "Payment history", icon: WalletCards, href: "/payments" },
+    { label: "Cashbook", description: "Daily income records", icon: ReceiptText, href: "/cashbook" },
     { label: "Events", description: "Workshops and camps", icon: CalendarDays, href: "/events" },
     { label: "Reports", description: "Insights and analytics", icon: BarChart3, href: "/reports" },
     { label: "Announcements", description: "School communications", icon: Megaphone, disabled: true },
