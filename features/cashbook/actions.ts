@@ -3,13 +3,17 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
-import { cashbookIncomeFormSchema, cashbookIncomeIdSchema } from "@/features/cashbook/schemas";
+import { cashbookExpenseFormSchema, cashbookExpenseIdSchema, cashbookIncomeFormSchema, cashbookIncomeIdSchema } from "@/features/cashbook/schemas";
 import type { CashbookActionState } from "@/features/cashbook/types";
 import { requireUserProfile } from "@/lib/auth/session";
 import {
+  archiveCashbookExpense,
   archiveCashbookIncome,
+  createCashbookExpense,
   createCashbookIncome,
+  updateCashbookExpense,
   updateCashbookIncome,
+  voidCashbookExpense,
   voidCashbookIncome,
 } from "@/services/cashbook/cashbook-service";
 
@@ -28,6 +32,19 @@ function formDataToIncomeInput(formData: FormData) {
     paymentMethod: formData.get("paymentMethod"),
     parentId: formData.get("parentId"),
     studentId: formData.get("studentId"),
+    description: formData.get("description"),
+    notes: formData.get("notes"),
+  };
+}
+
+function formDataToExpenseInput(formData: FormData) {
+  return {
+    expenseDate: formData.get("expenseDate"),
+    amount: formData.get("amount"),
+    expenseCategoryId: formData.get("expenseCategoryId"),
+    businessAreaId: formData.get("businessAreaId"),
+    paymentMethod: formData.get("paymentMethod"),
+    supplierOrStaffName: formData.get("supplierOrStaffName"),
     description: formData.get("description"),
     notes: formData.get("notes"),
   };
@@ -57,6 +74,26 @@ function errorState(error: unknown): CashbookActionState {
   }
 
   if (message.includes("cashbook_mutation_failed")) {
+    return validationState(defaultErrorMessage);
+  }
+
+  if (message.includes("expense_not_editable")) {
+    return validationState("Only recorded expenses can be edited.");
+  }
+
+  if (message.includes("expense_not_found")) {
+    return validationState("This expense record could not be found. Please reload Cashbook and try again.");
+  }
+
+  if (message.includes("expense_already_changed")) {
+    return validationState("This expense record has already changed. Please reload the page and try again.");
+  }
+
+  if (message.includes("invalid_expense_category")) {
+    return validationState("Choose an active expense category.");
+  }
+
+  if (message.includes("cashbook_expense_mutation_failed")) {
     return validationState(defaultErrorMessage);
   }
 
@@ -139,6 +176,83 @@ export async function voidCashbookIncomeAction(_previousState: CashbookActionSta
     revalidatePath("/cashbook");
     revalidatePath(`/cashbook/${parsed.data.incomeId}`);
     return { success: true, message: "Income record marked void." };
+  } catch (error) {
+    return errorState(error);
+  }
+}
+
+export async function createCashbookExpenseAction(_previousState: CashbookActionState, formData: FormData): Promise<CashbookActionState> {
+  const parsed = cashbookExpenseFormSchema.safeParse(formDataToExpenseInput(formData));
+
+  if (!parsed.success) {
+    return validationState("Please fix the highlighted expense fields.", parsed.error.flatten().fieldErrors);
+  }
+
+  let expenseId: string;
+
+  try {
+    const profile = await requireUserProfile();
+    expenseId = await createCashbookExpense(profile, parsed.data);
+    revalidatePath("/cashbook/expenses");
+    revalidatePath("/dashboard");
+  } catch (error) {
+    return errorState(error);
+  }
+
+  redirect(`/cashbook/expenses/${expenseId}`);
+}
+
+export async function updateCashbookExpenseAction(expenseId: string, _previousState: CashbookActionState, formData: FormData): Promise<CashbookActionState> {
+  const parsed = cashbookExpenseFormSchema.safeParse(formDataToExpenseInput(formData));
+
+  if (!parsed.success) {
+    return validationState("Please fix the highlighted expense fields.", parsed.error.flatten().fieldErrors);
+  }
+
+  try {
+    const profile = await requireUserProfile();
+    await updateCashbookExpense(profile, expenseId, parsed.data);
+    revalidatePath("/cashbook/expenses");
+    revalidatePath(`/cashbook/expenses/${expenseId}`);
+    revalidatePath("/dashboard");
+  } catch (error) {
+    return errorState(error);
+  }
+
+  redirect(`/cashbook/expenses/${expenseId}`);
+}
+
+export async function archiveCashbookExpenseAction(_previousState: CashbookActionState, formData: FormData): Promise<CashbookActionState> {
+  const parsed = cashbookExpenseIdSchema.safeParse(Object.fromEntries(formData.entries()));
+
+  if (!parsed.success) {
+    return validationState("Unable to archive this expense record. Please reload and try again.", parsed.error.flatten().fieldErrors);
+  }
+
+  try {
+    const profile = await requireUserProfile();
+    await archiveCashbookExpense(profile, parsed.data.expenseId);
+    revalidatePath("/cashbook/expenses");
+    revalidatePath(`/cashbook/expenses/${parsed.data.expenseId}`);
+    return { success: true, message: "Expense record archived." };
+  } catch (error) {
+    return errorState(error);
+  }
+}
+
+export async function voidCashbookExpenseAction(_previousState: CashbookActionState, formData: FormData): Promise<CashbookActionState> {
+  const parsed = cashbookExpenseIdSchema.safeParse(Object.fromEntries(formData.entries()));
+
+  if (!parsed.success) {
+    return validationState("Unable to void this expense record. Please reload and try again.", parsed.error.flatten().fieldErrors);
+  }
+
+  try {
+    const profile = await requireUserProfile();
+    await voidCashbookExpense(profile, parsed.data.expenseId);
+    revalidatePath("/cashbook/expenses");
+    revalidatePath(`/cashbook/expenses/${parsed.data.expenseId}`);
+    return { success: true, message: "Expense record marked void." };
   } catch (error) {
     return errorState(error);
   }
