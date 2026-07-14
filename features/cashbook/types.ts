@@ -1,9 +1,11 @@
-import type { cashbookExpenseStatusSchema, cashbookIncomeStatusSchema, cashbookPaymentMethodSchema } from "@/features/cashbook/schemas";
+import type { cashbookExpenseStatusSchema, cashbookIncomeStatusSchema, cashbookPaymentMethodSchema, cashbookTargetStatusSchema, cashbookTargetTypeSchema } from "@/features/cashbook/schemas";
 import type { z } from "zod";
 
 export type CashbookPaymentMethod = z.infer<typeof cashbookPaymentMethodSchema>;
 export type CashbookIncomeStatus = z.infer<typeof cashbookIncomeStatusSchema>;
 export type CashbookExpenseStatus = z.infer<typeof cashbookExpenseStatusSchema>;
+export type CashbookTargetStatus = z.infer<typeof cashbookTargetStatusSchema>;
+export type CashbookTargetType = z.infer<typeof cashbookTargetTypeSchema>;
 
 export type CashbookOption = {
   id: string;
@@ -90,6 +92,46 @@ export type CashbookExpenseDetail = CashbookExpenseListItem;
 export type CashbookExpenseListResult = {
   expenses: CashbookExpenseListItem[];
   summary: CashbookExpenseSummary;
+  totalRecords: number;
+  totalPages: number;
+  page: number;
+  pageSize: number;
+};
+
+export type CashbookTargetProgress = {
+  targetId: string;
+  branchId: string | null;
+  targetMonth: string;
+  targetType: CashbookTargetType;
+  targetValue: number;
+  currentValue: number;
+  remainingValue: number;
+  percentageAchieved: number;
+  daysRemaining: number;
+  projectedMonthEndValue: number;
+  averageRequiredPerRemainingDay: number;
+  targetStatus: "Achieved" | "On Track" | "Needs Attention" | "At Risk" | "No target";
+  businessAreaId: string | null;
+  businessAreaName: string | null;
+};
+
+export type CashbookTargetListItem = CashbookTargetProgress & {
+  id: string;
+  status: CashbookTargetStatus;
+  notes: string | null;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string | null;
+  createdBy: string | null;
+  updatedBy: string | null;
+  deletedBy: string | null;
+};
+
+export type CashbookTargetDetail = CashbookTargetListItem;
+
+export type CashbookTargetListResult = {
+  targets: CashbookTargetListItem[];
+  progressCards: CashbookTargetProgress[];
   totalRecords: number;
   totalPages: number;
   page: number;

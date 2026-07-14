@@ -1,13 +1,14 @@
 import Link from "next/link";
 
 type CashbookTabsProps = {
-  active: "income" | "expenses";
+  active: "income" | "expenses" | "targets";
 };
 
 export function CashbookTabs({ active }: CashbookTabsProps) {
   const tabs = [
     { id: "income" as const, label: "Daily Income", href: "/cashbook" },
     { id: "expenses" as const, label: "Expenses", href: "/cashbook/expenses" },
+    { id: "targets" as const, label: "Targets", href: "/cashbook/targets" },
   ];
 
   return (

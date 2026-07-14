@@ -1,7 +1,7 @@
 import { unstable_noStore as noStore } from "next/cache";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
-import type { CashbookExpenseFormInput, CashbookExpenseListQuery, CashbookIncomeFormInput, CashbookIncomeListQuery } from "@/features/cashbook/schemas";
+import type { CashbookExpenseFormInput, CashbookExpenseListQuery, CashbookIncomeFormInput, CashbookIncomeListQuery, CashbookTargetFormInput, CashbookTargetListQuery } from "@/features/cashbook/schemas";
 import type {
   CashbookExpenseDetail,
   CashbookExpenseListItem,
@@ -12,6 +12,10 @@ import type {
   CashbookIncomeListResult,
   CashbookIncomeSummary,
   CashbookOption,
+  CashbookTargetDetail,
+  CashbookTargetListItem,
+  CashbookTargetListResult,
+  CashbookTargetProgress,
 } from "@/features/cashbook/types";
 import { hasAnyPermission, hasRole } from "@/lib/auth/permissions";
 import type { UserProfile } from "@/lib/auth/types";
@@ -56,6 +60,40 @@ type CashbookExpenseRow = {
   created_by: string | null;
   updated_by: string | null;
   deleted_by: string | null;
+};
+
+type CashbookTargetRow = {
+  id: string;
+  branch_id: string | null;
+  target_month: string;
+  target_type: CashbookTargetListItem["targetType"];
+  target_value: number;
+  business_area_id: string | null;
+  status: CashbookTargetListItem["status"];
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+  deleted_at: string | null;
+  created_by: string | null;
+  updated_by: string | null;
+  deleted_by: string | null;
+};
+
+type CashbookTargetProgressRow = {
+  target_id: string;
+  branch_id: string | null;
+  target_month: string;
+  target_type: CashbookTargetListItem["targetType"];
+  target_value: number;
+  current_value: number;
+  remaining_value: number;
+  percentage_achieved: number;
+  days_remaining: number;
+  projected_month_end_value: number;
+  average_required_per_remaining_day: number;
+  target_status: CashbookTargetProgress["targetStatus"];
+  business_area_id: string | null;
+  business_area_name: string | null;
 };
 
 type NameRow = {
@@ -115,6 +153,14 @@ export function canArchiveCashbookExpenses(profile: UserProfile): boolean {
   return hasRole(profile, ["super_admin", "admin"]) && hasAnyPermission(profile, ["expenses.archive.all", "expenses.manage.all"]);
 }
 
+export function canViewBusinessTargets(profile: UserProfile): boolean {
+  return hasRole(profile, ["super_admin", "admin"]) && hasAnyPermission(profile, ["business_targets.view.all", "business_targets.manage.all", "business_performance.view.all"]);
+}
+
+export function canManageBusinessTargets(profile: UserProfile): boolean {
+  return hasRole(profile, ["super_admin", "admin"]) && hasAnyPermission(profile, ["business_targets.manage.all"]);
+}
+
 function toMoney(value: unknown): number {
   return Math.round(Number(value ?? 0) * 100) / 100;
 }
@@ -130,7 +176,7 @@ function formatOption(row: NameRow): CashbookOption {
 function assertUpdatedRow(
   data: { id: string } | null,
   error: CashbookMutationError,
-  emptyResultError: "income_not_found" | "income_not_editable" | "income_already_changed" | "expense_not_found" | "expense_not_editable" | "expense_already_changed",
+  emptyResultError: "income_not_found" | "income_not_editable" | "income_already_changed" | "expense_not_found" | "expense_not_editable" | "expense_already_changed" | "target_not_found" | "target_not_editable" | "target_already_changed",
 ): void {
   if (error?.code === "PGRST116") {
     throw new Error(emptyResultError);
@@ -320,7 +366,7 @@ export async function getCashbookIncomeDetail(profile: UserProfile, incomeId: st
 }
 
 export async function listCashbookBusinessAreas(profile: UserProfile): Promise<CashbookOption[]> {
-  if (!canViewCashbookIncome(profile) && !canCreateCashbookIncome(profile) && !canViewCashbookExpenses(profile) && !canCreateCashbookExpenses(profile)) {
+  if (!canViewCashbookIncome(profile) && !canCreateCashbookIncome(profile) && !canViewCashbookExpenses(profile) && !canCreateCashbookExpenses(profile) && !canViewBusinessTargets(profile) && !canManageBusinessTargets(profile)) {
     throw new Error("forbidden");
   }
 
@@ -856,4 +902,321 @@ export async function voidCashbookExpense(profile: UserProfile, expenseId: strin
     .single();
 
   assertUpdatedRow(data as { id: string } | null, error, "expense_already_changed");
+}
+
+function mapTargetProgressRow(row: CashbookTargetProgressRow): CashbookTargetProgress {
+  return {
+    targetId: row.target_id,
+    branchId: row.branch_id,
+    targetMonth: row.target_month,
+    targetType: row.target_type,
+    targetValue: toMoney(row.target_value),
+    currentValue: toMoney(row.current_value),
+    remainingValue: toMoney(row.remaining_value),
+    percentageAchieved: toMoney(row.percentage_achieved),
+    daysRemaining: Number(row.days_remaining ?? 0),
+    projectedMonthEndValue: toMoney(row.projected_month_end_value),
+    averageRequiredPerRemainingDay: toMoney(row.average_required_per_remaining_day),
+    targetStatus: row.target_status,
+    businessAreaId: row.business_area_id,
+    businessAreaName: row.business_area_name,
+  };
+}
+
+function fallbackProgress(row: CashbookTargetRow): CashbookTargetProgress {
+  return {
+    targetId: row.id,
+    branchId: row.branch_id,
+    targetMonth: row.target_month,
+    targetType: row.target_type,
+    targetValue: toMoney(row.target_value),
+    currentValue: 0,
+    remainingValue: toMoney(row.target_value),
+    percentageAchieved: 0,
+    daysRemaining: 0,
+    projectedMonthEndValue: 0,
+    averageRequiredPerRemainingDay: 0,
+    targetStatus: "On Track",
+    businessAreaId: row.business_area_id,
+    businessAreaName: null,
+  };
+}
+
+async function getTargetProgressMap(targetIds: string[]): Promise<Map<string, CashbookTargetProgress>> {
+  if (targetIds.length === 0) {
+    return new Map();
+  }
+
+  const supabase = await createCashbookSupabaseClient();
+  const { data, error } = await supabase
+    .from("cashbook_target_progress_view")
+    .select("target_id, branch_id, target_month, target_type, target_value, current_value, remaining_value, percentage_achieved, days_remaining, projected_month_end_value, average_required_per_remaining_day, target_status, business_area_id, business_area_name")
+    .in("target_id", targetIds);
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return new Map(((data ?? []) as CashbookTargetProgressRow[]).map((row) => [row.target_id, mapTargetProgressRow(row)]));
+}
+
+async function mapTargetRows(rows: CashbookTargetRow[]): Promise<CashbookTargetListItem[]> {
+  const [progressMap, areaNames] = await Promise.all([
+    getTargetProgressMap(rows.filter((row) => row.status === "active" && !row.deleted_at).map((row) => row.id)),
+    getNameMap("business_areas", [...new Set(rows.map((row) => row.business_area_id).filter(Boolean) as string[])]),
+  ]);
+
+  return rows.map((row) => {
+    const progress = progressMap.get(row.id) ?? fallbackProgress(row);
+
+    return {
+      ...progress,
+      id: row.id,
+      targetId: row.id,
+      businessAreaName: progress.businessAreaName ?? (row.business_area_id ? areaNames.get(row.business_area_id) ?? "Unknown area" : null),
+      status: row.status,
+      notes: row.notes,
+      createdAt: row.created_at,
+      updatedAt: row.updated_at,
+      deletedAt: row.deleted_at,
+      createdBy: row.created_by,
+      updatedBy: row.updated_by,
+      deletedBy: row.deleted_by,
+    };
+  });
+}
+
+function currentMonthStart(): string {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+
+  return `${year}-${month}-01`;
+}
+
+export async function listCashbookTargets(profile: UserProfile, filters: CashbookTargetListQuery): Promise<CashbookTargetListResult> {
+  noStore();
+
+  if (!canViewBusinessTargets(profile)) {
+    throw new Error("forbidden");
+  }
+
+  const supabase = await createCashbookSupabaseClient();
+  const from = (filters.page - 1) * filters.pageSize;
+  const to = from + filters.pageSize - 1;
+
+  let query = supabase
+    .from("monthly_business_targets")
+    .select("id, branch_id, target_month, target_type, target_value, business_area_id, status, notes, created_at, updated_at, deleted_at, created_by, updated_by, deleted_by", {
+      count: "exact",
+    });
+
+  if (filters.status === "archived") {
+    query = query.eq("status", "archived");
+  } else if (filters.status !== "all") {
+    query = query.eq("status", filters.status).is("deleted_at", null);
+  } else {
+    query = query.is("deleted_at", null);
+  }
+
+  if (filters.targetMonth) {
+    query = query.eq("target_month", filters.targetMonth);
+  }
+
+  if (filters.targetType !== "all") {
+    query = query.eq("target_type", filters.targetType);
+  }
+
+  if (filters.businessAreaId !== "all") {
+    query = filters.businessAreaId === "none" ? query.is("business_area_id", null) : query.eq("business_area_id", filters.businessAreaId);
+  }
+
+  if (filters.query) {
+    query = query.ilike("notes", `%${filters.query}%`);
+  }
+
+  const { data, error, count } = await query.order(filters.sort, { ascending: filters.direction === "asc" }).range(from, to);
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  const rows = (data ?? []) as CashbookTargetRow[];
+  const [targets, progressCards] = await Promise.all([
+    mapTargetRows(rows),
+    listCurrentMonthTargetProgress(profile),
+  ]);
+
+  return {
+    targets,
+    progressCards,
+    totalRecords: count ?? 0,
+    totalPages: Math.ceil((count ?? 0) / filters.pageSize),
+    page: filters.page,
+    pageSize: filters.pageSize,
+  };
+}
+
+export async function listCurrentMonthTargetProgress(profile: UserProfile): Promise<CashbookTargetProgress[]> {
+  noStore();
+
+  if (!canViewBusinessTargets(profile)) {
+    throw new Error("forbidden");
+  }
+
+  const supabase = await createCashbookSupabaseClient();
+  const { data, error } = await supabase
+    .from("cashbook_target_progress_view")
+    .select("target_id, branch_id, target_month, target_type, target_value, current_value, remaining_value, percentage_achieved, days_remaining, projected_month_end_value, average_required_per_remaining_day, target_status, business_area_id, business_area_name")
+    .eq("target_month", currentMonthStart())
+    .is("business_area_id", null)
+    .order("target_type", { ascending: true });
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return ((data ?? []) as CashbookTargetProgressRow[]).map(mapTargetProgressRow);
+}
+
+export async function getCashbookTargetDetail(profile: UserProfile, targetId: string): Promise<CashbookTargetDetail | null> {
+  noStore();
+
+  if (!canViewBusinessTargets(profile)) {
+    throw new Error("forbidden");
+  }
+
+  const supabase = await createCashbookSupabaseClient();
+  const { data, error } = await supabase
+    .from("monthly_business_targets")
+    .select("id, branch_id, target_month, target_type, target_value, business_area_id, status, notes, created_at, updated_at, deleted_at, created_by, updated_by, deleted_by")
+    .eq("id", targetId)
+    .maybeSingle();
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  if (!data) {
+    return null;
+  }
+
+  const [target] = await mapTargetRows([data as CashbookTargetRow]);
+  return target;
+}
+
+async function assertUniqueActiveTarget(supabase: SupabaseClient, input: CashbookTargetFormInput, excludeTargetId?: string): Promise<void> {
+  let query = supabase
+    .from("monthly_business_targets")
+    .select("id")
+    .eq("target_month", input.targetMonth)
+    .eq("target_type", input.targetType)
+    .eq("status", "active")
+    .is("deleted_at", null);
+
+  query = input.businessAreaId ? query.eq("business_area_id", input.businessAreaId) : query.is("business_area_id", null);
+
+  if (excludeTargetId) {
+    query = query.neq("id", excludeTargetId);
+  }
+
+  const { data, error } = await query.limit(1);
+
+  if (error) {
+    throw new Error("target_mutation_failed");
+  }
+
+  if ((data ?? []).length > 0) {
+    throw new Error("duplicate_active_target");
+  }
+}
+
+export async function createCashbookTarget(profile: UserProfile, input: CashbookTargetFormInput): Promise<string> {
+  if (!canManageBusinessTargets(profile)) {
+    throw new Error("forbidden");
+  }
+
+  const supabase = await createCashbookSupabaseClient();
+  await assertUniqueActiveTarget(supabase, input);
+
+  const { data, error } = await supabase
+    .from("monthly_business_targets")
+    .insert({
+      target_month: input.targetMonth,
+      target_type: input.targetType,
+      target_value: input.targetValue,
+      business_area_id: input.businessAreaId,
+      notes: input.notes,
+      status: "active",
+      created_by: profile.id,
+      updated_by: profile.id,
+    })
+    .select("id")
+    .single();
+
+  if (error) {
+    throw new Error(error.code === "23505" ? "duplicate_active_target" : "target_mutation_failed");
+  }
+
+  return (data as { id: string }).id;
+}
+
+export async function updateCashbookTarget(profile: UserProfile, targetId: string, input: CashbookTargetFormInput): Promise<void> {
+  if (!canManageBusinessTargets(profile)) {
+    throw new Error("forbidden");
+  }
+
+  const existing = await getCashbookTargetDetail(profile, targetId);
+
+  if (!existing || existing.status !== "active" || existing.deletedAt) {
+    throw new Error("target_not_editable");
+  }
+
+  const supabase = await createCashbookSupabaseClient();
+  await assertUniqueActiveTarget(supabase, input, targetId);
+
+  const { data, error } = await supabase
+    .from("monthly_business_targets")
+    .update({
+      target_month: input.targetMonth,
+      target_type: input.targetType,
+      target_value: input.targetValue,
+      business_area_id: input.businessAreaId,
+      notes: input.notes,
+      updated_by: profile.id,
+    })
+    .eq("id", targetId)
+    .eq("status", "active")
+    .is("deleted_at", null)
+    .select("id")
+    .single();
+
+  if (error?.code === "23505") {
+    throw new Error("duplicate_active_target");
+  }
+
+  assertUpdatedRow(data as { id: string } | null, error, "target_already_changed");
+}
+
+export async function archiveCashbookTarget(profile: UserProfile, targetId: string): Promise<void> {
+  if (!canManageBusinessTargets(profile)) {
+    throw new Error("forbidden");
+  }
+
+  const supabase = await createCashbookSupabaseClient();
+  const { data, error } = await supabase
+    .from("monthly_business_targets")
+    .update({
+      status: "archived",
+      deleted_at: new Date().toISOString(),
+      deleted_by: profile.id,
+      updated_by: profile.id,
+    })
+    .eq("id", targetId)
+    .eq("status", "active")
+    .is("deleted_at", null)
+    .select("id")
+    .single();
+
+  assertUpdatedRow(data as { id: string } | null, error, "target_already_changed");
 }

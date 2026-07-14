@@ -3,16 +3,19 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
-import { cashbookExpenseFormSchema, cashbookExpenseIdSchema, cashbookIncomeFormSchema, cashbookIncomeIdSchema } from "@/features/cashbook/schemas";
+import { cashbookExpenseFormSchema, cashbookExpenseIdSchema, cashbookIncomeFormSchema, cashbookIncomeIdSchema, cashbookTargetFormSchema, cashbookTargetIdSchema } from "@/features/cashbook/schemas";
 import type { CashbookActionState } from "@/features/cashbook/types";
 import { requireUserProfile } from "@/lib/auth/session";
 import {
   archiveCashbookExpense,
   archiveCashbookIncome,
+  archiveCashbookTarget,
   createCashbookExpense,
   createCashbookIncome,
+  createCashbookTarget,
   updateCashbookExpense,
   updateCashbookIncome,
+  updateCashbookTarget,
   voidCashbookExpense,
   voidCashbookIncome,
 } from "@/services/cashbook/cashbook-service";
@@ -46,6 +49,30 @@ function formDataToExpenseInput(formData: FormData) {
     paymentMethod: formData.get("paymentMethod"),
     supplierOrStaffName: formData.get("supplierOrStaffName"),
     description: formData.get("description"),
+    notes: formData.get("notes"),
+  };
+}
+
+function normalizeTargetMonth(value: FormDataEntryValue | null): string | null {
+  const rawValue = String(value ?? "").trim();
+
+  if (/^\d{4}-\d{2}$/.test(rawValue)) {
+    return `${rawValue}-01`;
+  }
+
+  if (/^\d{4}-\d{2}-\d{2}$/.test(rawValue)) {
+    return `${rawValue.slice(0, 7)}-01`;
+  }
+
+  return rawValue || null;
+}
+
+function formDataToTargetInput(formData: FormData) {
+  return {
+    targetMonth: normalizeTargetMonth(formData.get("targetMonth")),
+    targetType: formData.get("targetType"),
+    targetValue: formData.get("targetValue"),
+    businessAreaId: formData.get("businessAreaId"),
     notes: formData.get("notes"),
   };
 }
@@ -98,7 +125,27 @@ function errorState(error: unknown): CashbookActionState {
   }
 
   if (message.includes("duplicate key") || message.includes("unique")) {
-    return validationState("This income record already exists.");
+    return validationState("This record already exists.");
+  }
+
+  if (message.includes("target_not_editable")) {
+    return validationState("Only active targets can be edited.");
+  }
+
+  if (message.includes("target_not_found")) {
+    return validationState("This target could not be found. Please reload Cashbook and try again.");
+  }
+
+  if (message.includes("target_already_changed")) {
+    return validationState("This target has already changed. Please reload the page and try again.");
+  }
+
+  if (message.includes("duplicate_active_target")) {
+    return validationState("An active target already exists for this month, target type, and business area.");
+  }
+
+  if (message.includes("target_mutation_failed")) {
+    return validationState("Something went wrong. Please review the target details and try again.");
   }
 
   return validationState(defaultErrorMessage);
@@ -253,6 +300,65 @@ export async function voidCashbookExpenseAction(_previousState: CashbookActionSt
     revalidatePath("/cashbook/expenses");
     revalidatePath(`/cashbook/expenses/${parsed.data.expenseId}`);
     return { success: true, message: "Expense record marked void." };
+  } catch (error) {
+    return errorState(error);
+  }
+}
+
+export async function createCashbookTargetAction(_previousState: CashbookActionState, formData: FormData): Promise<CashbookActionState> {
+  const parsed = cashbookTargetFormSchema.safeParse(formDataToTargetInput(formData));
+
+  if (!parsed.success) {
+    return validationState("Please fix the highlighted target fields.", parsed.error.flatten().fieldErrors);
+  }
+
+  let targetId: string;
+
+  try {
+    const profile = await requireUserProfile();
+    targetId = await createCashbookTarget(profile, parsed.data);
+    revalidatePath("/cashbook/targets");
+    revalidatePath("/dashboard");
+  } catch (error) {
+    return errorState(error);
+  }
+
+  redirect(`/cashbook/targets/${targetId}`);
+}
+
+export async function updateCashbookTargetAction(targetId: string, _previousState: CashbookActionState, formData: FormData): Promise<CashbookActionState> {
+  const parsed = cashbookTargetFormSchema.safeParse(formDataToTargetInput(formData));
+
+  if (!parsed.success) {
+    return validationState("Please fix the highlighted target fields.", parsed.error.flatten().fieldErrors);
+  }
+
+  try {
+    const profile = await requireUserProfile();
+    await updateCashbookTarget(profile, targetId, parsed.data);
+    revalidatePath("/cashbook/targets");
+    revalidatePath(`/cashbook/targets/${targetId}`);
+    revalidatePath("/dashboard");
+  } catch (error) {
+    return errorState(error);
+  }
+
+  redirect(`/cashbook/targets/${targetId}`);
+}
+
+export async function archiveCashbookTargetAction(_previousState: CashbookActionState, formData: FormData): Promise<CashbookActionState> {
+  const parsed = cashbookTargetIdSchema.safeParse(Object.fromEntries(formData.entries()));
+
+  if (!parsed.success) {
+    return validationState("Unable to archive this target. Please reload and try again.", parsed.error.flatten().fieldErrors);
+  }
+
+  try {
+    const profile = await requireUserProfile();
+    await archiveCashbookTarget(profile, parsed.data.targetId);
+    revalidatePath("/cashbook/targets");
+    revalidatePath(`/cashbook/targets/${parsed.data.targetId}`);
+    return { success: true, message: "Monthly target archived." };
   } catch (error) {
     return errorState(error);
   }
