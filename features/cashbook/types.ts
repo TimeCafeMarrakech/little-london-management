@@ -1,4 +1,4 @@
-import type { cashbookExpenseStatusSchema, cashbookIncomeStatusSchema, cashbookPaymentMethodSchema, cashbookTargetStatusSchema, cashbookTargetTypeSchema } from "@/features/cashbook/schemas";
+import type { cashbookExpenseStatusSchema, cashbookIncomeStatusSchema, cashbookPaymentMethodSchema, cashbookPerformancePeriodSchema, cashbookTargetStatusSchema, cashbookTargetTypeSchema } from "@/features/cashbook/schemas";
 import type { z } from "zod";
 
 export type CashbookPaymentMethod = z.infer<typeof cashbookPaymentMethodSchema>;
@@ -6,6 +6,7 @@ export type CashbookIncomeStatus = z.infer<typeof cashbookIncomeStatusSchema>;
 export type CashbookExpenseStatus = z.infer<typeof cashbookExpenseStatusSchema>;
 export type CashbookTargetStatus = z.infer<typeof cashbookTargetStatusSchema>;
 export type CashbookTargetType = z.infer<typeof cashbookTargetTypeSchema>;
+export type CashbookPerformancePeriod = z.infer<typeof cashbookPerformancePeriodSchema>;
 
 export type CashbookOption = {
   id: string;
@@ -142,4 +143,110 @@ export type CashbookActionState = {
   success: boolean;
   message: string;
   fieldErrors?: Record<string, string[]>;
+};
+
+export type CashbookComparison = {
+  difference: number;
+  percentChange: number | null;
+  isNeutral: boolean;
+  label: string;
+};
+
+export type CashbookExecutiveSummaryMetric = {
+  id: "invoice_payments" | "cashbook_income" | "total_income" | "expenses" | "net_profit" | "outstanding_invoices" | "profit_margin";
+  label: string;
+  value: number;
+  valueType: "money" | "percent";
+  helper: string;
+  comparison: CashbookComparison | null;
+  tone: "coral" | "sage" | "yellow" | "navy";
+};
+
+export type CashbookTrendPoint = {
+  label: string;
+  date: string;
+  totalIncome: number;
+  expenses: number;
+  netProfit: number;
+};
+
+export type CashbookOutstandingInvoiceSummary = {
+  totalOutstanding: number;
+  unpaidInvoiceCount: number;
+  oldestOutstandingInvoiceAgeDays: number | null;
+};
+
+export type CashbookTodayBusinessGoal = {
+  revenueTarget: CashbookTargetProgress | null;
+};
+
+export type CashbookStudentKpis = {
+  activeStudents: number;
+  newActiveStudentsThisMonth: number | null;
+  archivedOrInactiveThisMonth: number | null;
+  limitation: string | null;
+};
+
+export type CashbookBusinessAreaPerformanceItem = {
+  id: string;
+  name: string;
+  income: number;
+  expenses: number;
+  profit: number;
+  profitMargin: number | null;
+  shareOfTotalIncome: number;
+  targetStatus: CashbookTargetProgress["targetStatus"] | "Not set";
+};
+
+export type CashbookExpenseCategoryAnalysisItem = {
+  id: string;
+  name: string;
+  total: number;
+  percentOfExpenses: number;
+};
+
+export type CashbookExpenseCategoryAnalysis = {
+  totalExpenses: number;
+  largestCategory: CashbookExpenseCategoryAnalysisItem | null;
+  salaryTotal: number;
+  categories: CashbookExpenseCategoryAnalysisItem[];
+};
+
+export type CashbookPaymentMethodBreakdownItem = {
+  method: "cash" | "bank_transfer" | "cheque" | "other";
+  label: string;
+  invoicePaymentIncome: number;
+  cashbookIncome: number;
+  expenseOutflow: number;
+  netMovement: number;
+};
+
+export type CashbookCashMovement = {
+  cashReceived: number;
+  cashExpenses: number;
+  netCashMovement: number;
+};
+
+export type CashbookManagementInsight = {
+  title: string;
+  detail: string;
+  tone: "coral" | "sage" | "yellow" | "navy";
+};
+
+export type CashbookPerformanceDashboard = {
+  period: CashbookPerformancePeriod;
+  periodLabel: string;
+  currentRange: { start: string; end: string };
+  previousRange: { start: string; end: string };
+  summaryCards: CashbookExecutiveSummaryMetric[];
+  outstandingInvoices: CashbookOutstandingInvoiceSummary;
+  todayBusinessGoal: CashbookTodayBusinessGoal;
+  monthlyTargets: CashbookTargetProgress[];
+  studentKpis: CashbookStudentKpis;
+  trends: CashbookTrendPoint[];
+  businessAreas: CashbookBusinessAreaPerformanceItem[];
+  expenseAnalysis: CashbookExpenseCategoryAnalysis;
+  paymentMethods: CashbookPaymentMethodBreakdownItem[];
+  cashMovement: CashbookCashMovement;
+  insights: CashbookManagementInsight[];
 };

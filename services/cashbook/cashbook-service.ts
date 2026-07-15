@@ -1,17 +1,28 @@
 import { unstable_noStore as noStore } from "next/cache";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
-import type { CashbookExpenseFormInput, CashbookExpenseListQuery, CashbookIncomeFormInput, CashbookIncomeListQuery, CashbookTargetFormInput, CashbookTargetListQuery } from "@/features/cashbook/schemas";
+import type { CashbookExpenseFormInput, CashbookExpenseListQuery, CashbookIncomeFormInput, CashbookIncomeListQuery, CashbookPerformancePeriod, CashbookTargetFormInput, CashbookTargetListQuery } from "@/features/cashbook/schemas";
 import type {
   CashbookExpenseDetail,
   CashbookExpenseListItem,
   CashbookExpenseListResult,
   CashbookExpenseSummary,
+  CashbookBusinessAreaPerformanceItem,
+  CashbookCashMovement,
+  CashbookComparison,
+  CashbookExpenseCategoryAnalysis,
+  CashbookExpenseCategoryAnalysisItem,
+  CashbookExecutiveSummaryMetric,
   CashbookIncomeDetail,
   CashbookIncomeListItem,
   CashbookIncomeListResult,
   CashbookIncomeSummary,
+  CashbookManagementInsight,
   CashbookOption,
+  CashbookPaymentMethodBreakdownItem,
+  CashbookPerformanceDashboard,
+  CashbookStudentKpis,
+  CashbookTrendPoint,
   CashbookTargetDetail,
   CashbookTargetListItem,
   CashbookTargetListResult,
@@ -155,6 +166,10 @@ export function canArchiveCashbookExpenses(profile: UserProfile): boolean {
 
 export function canViewBusinessTargets(profile: UserProfile): boolean {
   return hasRole(profile, ["super_admin", "admin"]) && hasAnyPermission(profile, ["business_targets.view.all", "business_targets.manage.all", "business_performance.view.all"]);
+}
+
+export function canViewBusinessPerformance(profile: UserProfile): boolean {
+  return hasRole(profile, ["super_admin", "admin"]) && hasAnyPermission(profile, ["business_performance.view.all"]);
 }
 
 export function canManageBusinessTargets(profile: UserProfile): boolean {
@@ -1219,4 +1234,734 @@ export async function archiveCashbookTarget(profile: UserProfile, targetId: stri
     .single();
 
   assertUpdatedRow(data as { id: string } | null, error, "target_already_changed");
+}
+
+type DateRange = {
+  start: string;
+  end: string;
+};
+
+type PeriodDefinition = {
+  current: DateRange;
+  previous: DateRange;
+  label: string;
+};
+
+type SummaryTotals = {
+  invoicePaymentTotal: number;
+  cashbookIncomeTotal: number;
+  totalIncome: number;
+  expenseTotal: number;
+  netProfit: number;
+};
+
+type DailySummaryRow = {
+  summary_date: string;
+  invoice_payment_total: number;
+  cashbook_income_total: number;
+  total_income: number;
+  expense_total: number;
+  net_profit: number;
+};
+
+type MonthlySummaryRow = {
+  summary_month: string;
+  invoice_payment_total: number;
+  cashbook_income_total: number;
+  total_income: number;
+  expense_total: number;
+  net_profit: number;
+};
+
+type PaymentRow = {
+  payment_date: string;
+  amount: number;
+  payment_method: string;
+};
+
+type PerformanceIncomeRow = {
+  income_date: string;
+  amount: number;
+  payment_method: string;
+  business_area_id: string;
+};
+
+type PerformanceExpenseRow = {
+  expense_date: string;
+  amount: number;
+  payment_method: string;
+  business_area_id: string | null;
+  expense_category_id: string;
+};
+
+type OutstandingInvoiceRow = {
+  id: string;
+  invoice_number: string;
+  total: number;
+  due_date: string;
+};
+
+type PaymentAllocationRow = {
+  invoice_id: string;
+  amount_allocated: number;
+};
+
+function localDateString(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
+}
+
+function addDays(date: Date, days: number): Date {
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate() + days);
+}
+
+function startOfWeek(date: Date): Date {
+  const day = date.getDay();
+  const diff = day === 0 ? -6 : 1 - day;
+  return addDays(date, diff);
+}
+
+function monthRange(year: number, monthIndex: number): DateRange {
+  return {
+    start: localDateString(new Date(year, monthIndex, 1)),
+    end: localDateString(new Date(year, monthIndex + 1, 0)),
+  };
+}
+
+function getPeriodDefinition(period: CashbookPerformancePeriod): PeriodDefinition {
+  const now = new Date();
+
+  if (period === "today") {
+    const today = localDateString(now);
+    const yesterday = localDateString(addDays(now, -1));
+    return {
+      current: { start: today, end: today },
+      previous: { start: yesterday, end: yesterday },
+      label: "Today",
+    };
+  }
+
+  if (period === "week") {
+    const weekStart = startOfWeek(now);
+    const previousWeekStart = addDays(weekStart, -7);
+    return {
+      current: { start: localDateString(weekStart), end: localDateString(addDays(weekStart, 6)) },
+      previous: { start: localDateString(previousWeekStart), end: localDateString(addDays(previousWeekStart, 6)) },
+      label: "This Week",
+    };
+  }
+
+  if (period === "year") {
+    return {
+      current: { start: localDateString(new Date(now.getFullYear(), 0, 1)), end: localDateString(new Date(now.getFullYear(), 11, 31)) },
+      previous: { start: localDateString(new Date(now.getFullYear() - 1, 0, 1)), end: localDateString(new Date(now.getFullYear() - 1, 11, 31)) },
+      label: "This Year",
+    };
+  }
+
+  const currentMonth = monthRange(now.getFullYear(), now.getMonth());
+  const previousMonthDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+
+  return {
+    current: currentMonth,
+    previous: monthRange(previousMonthDate.getFullYear(), previousMonthDate.getMonth()),
+    label: "This Month",
+  };
+}
+
+function emptySummaryTotals(): SummaryTotals {
+  return {
+    invoicePaymentTotal: 0,
+    cashbookIncomeTotal: 0,
+    totalIncome: 0,
+    expenseTotal: 0,
+    netProfit: 0,
+  };
+}
+
+function aggregateSummaryRows(rows: Array<DailySummaryRow | MonthlySummaryRow>): SummaryTotals {
+  return rows.reduce((totals, row) => ({
+    invoicePaymentTotal: toMoney(totals.invoicePaymentTotal + toMoney(row.invoice_payment_total)),
+    cashbookIncomeTotal: toMoney(totals.cashbookIncomeTotal + toMoney(row.cashbook_income_total)),
+    totalIncome: toMoney(totals.totalIncome + toMoney(row.total_income)),
+    expenseTotal: toMoney(totals.expenseTotal + toMoney(row.expense_total)),
+    netProfit: toMoney(totals.netProfit + toMoney(row.net_profit)),
+  }), emptySummaryTotals());
+}
+
+function buildComparison(current: number, previous: number): CashbookComparison {
+  const difference = toMoney(current - previous);
+
+  if (previous === 0) {
+    return {
+      difference,
+      percentChange: null,
+      isNeutral: true,
+      label: "No previous period",
+    };
+  }
+
+  const percentChange = toMoney((difference / Math.abs(previous)) * 100);
+  const direction = difference >= 0 ? "up" : "down";
+
+  return {
+    difference,
+    percentChange,
+    isNeutral: false,
+    label: `${Math.abs(percentChange)}% ${direction}`,
+  };
+}
+
+function buildSummaryCard(
+  id: CashbookExecutiveSummaryMetric["id"],
+  label: string,
+  value: number,
+  previousValue: number,
+  helper: string,
+  tone: CashbookExecutiveSummaryMetric["tone"],
+  valueType: CashbookExecutiveSummaryMetric["valueType"] = "money",
+): CashbookExecutiveSummaryMetric {
+  return {
+    id,
+    label,
+    value: toMoney(value),
+    valueType,
+    helper,
+    comparison: buildComparison(value, previousValue),
+    tone,
+  };
+}
+
+async function getSummaryRows(supabase: SupabaseClient, range: DateRange): Promise<DailySummaryRow[]> {
+  const { data, error } = await supabase
+    .from("cashbook_daily_summary_view")
+    .select("summary_date, invoice_payment_total, cashbook_income_total, total_income, expense_total, net_profit")
+    .gte("summary_date", range.start)
+    .lte("summary_date", range.end)
+    .order("summary_date", { ascending: true });
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return (data ?? []) as DailySummaryRow[];
+}
+
+async function getMonthlySummaryRows(supabase: SupabaseClient, range: DateRange): Promise<MonthlySummaryRow[]> {
+  const { data, error } = await supabase
+    .from("cashbook_monthly_summary_view")
+    .select("summary_month, invoice_payment_total, cashbook_income_total, total_income, expense_total, net_profit")
+    .gte("summary_month", range.start)
+    .lte("summary_month", range.end)
+    .order("summary_month", { ascending: true });
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return (data ?? []) as MonthlySummaryRow[];
+}
+
+function formatTrendLabel(dateString: string, period: CashbookPerformancePeriod): string {
+  const [year, month, day] = dateString.split("-").map(Number);
+  const date = new Date(year, month - 1, day ?? 1);
+
+  if (period === "year") {
+    return date.toLocaleDateString("en-GB", { month: "short" });
+  }
+
+  return date.toLocaleDateString("en-GB", { day: "2-digit", month: "short" });
+}
+
+function mapTrendRows(rows: Array<DailySummaryRow | MonthlySummaryRow>, period: CashbookPerformancePeriod): CashbookTrendPoint[] {
+  return rows.map((row) => {
+    const date = "summary_month" in row ? row.summary_month : row.summary_date;
+
+    return {
+      label: formatTrendLabel(date, period),
+      date,
+      totalIncome: toMoney(row.total_income),
+      expenses: toMoney(row.expense_total),
+      netProfit: toMoney(row.net_profit),
+    };
+  });
+}
+
+async function getOutstandingInvoiceSummary(supabase: SupabaseClient): Promise<{ summary: CashbookPerformanceDashboard["outstandingInvoices"]; totalForComparison: number }> {
+  const { data: invoices, error } = await supabase
+    .from("invoices")
+    .select("id, invoice_number, total, due_date")
+    .in("status", ["issued", "partially_paid"])
+    .is("deleted_at", null);
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  const invoiceRows = (invoices ?? []) as OutstandingInvoiceRow[];
+  const invoiceIds = invoiceRows.map((invoice) => invoice.id);
+
+  let allocations: PaymentAllocationRow[] = [];
+  if (invoiceIds.length > 0) {
+    const { data: allocationData, error: allocationError } = await supabase
+      .from("payment_allocations")
+      .select("invoice_id, amount_allocated")
+      .in("invoice_id", invoiceIds);
+
+    if (allocationError) {
+      throw new Error(allocationError.message);
+    }
+
+    allocations = (allocationData ?? []) as PaymentAllocationRow[];
+  }
+
+  const paidByInvoice = new Map<string, number>();
+  allocations.forEach((allocation) => {
+    paidByInvoice.set(allocation.invoice_id, toMoney((paidByInvoice.get(allocation.invoice_id) ?? 0) + toMoney(allocation.amount_allocated)));
+  });
+
+  const today = new Date();
+  const outstandingRows = invoiceRows.map((invoice) => ({
+    ...invoice,
+    balance: Math.max(toMoney(invoice.total) - (paidByInvoice.get(invoice.id) ?? 0), 0),
+  })).filter((invoice) => invoice.balance > 0);
+
+  const oldestOutstandingInvoiceAgeDays = outstandingRows.length > 0
+    ? Math.max(...outstandingRows.map((invoice) => {
+      const [year, month, day] = invoice.due_date.split("-").map(Number);
+      const dueDate = new Date(year, month - 1, day);
+      return Math.max(Math.floor((today.getTime() - dueDate.getTime()) / 86400000), 0);
+    }))
+    : null;
+
+  const totalOutstanding = toMoney(outstandingRows.reduce((sum, invoice) => sum + invoice.balance, 0));
+
+  return {
+    summary: {
+      totalOutstanding,
+      unpaidInvoiceCount: outstandingRows.length,
+      oldestOutstandingInvoiceAgeDays,
+    },
+    totalForComparison: totalOutstanding,
+  };
+}
+
+async function getPerformanceIncomeRows(supabase: SupabaseClient, range: DateRange): Promise<PerformanceIncomeRow[]> {
+  const { data, error } = await supabase
+    .from("cashbook_income_entries")
+    .select("income_date, amount, payment_method, business_area_id")
+    .eq("status", "recorded")
+    .is("deleted_at", null)
+    .gte("income_date", range.start)
+    .lte("income_date", range.end);
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return (data ?? []) as PerformanceIncomeRow[];
+}
+
+async function getPerformanceExpenseRows(supabase: SupabaseClient, range: DateRange): Promise<PerformanceExpenseRow[]> {
+  const { data, error } = await supabase
+    .from("cashbook_expense_entries")
+    .select("expense_date, amount, payment_method, business_area_id, expense_category_id")
+    .eq("status", "recorded")
+    .is("deleted_at", null)
+    .gte("expense_date", range.start)
+    .lte("expense_date", range.end);
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return (data ?? []) as PerformanceExpenseRow[];
+}
+
+async function getPaymentRows(supabase: SupabaseClient, range: DateRange): Promise<PaymentRow[]> {
+  const { data, error } = await supabase
+    .from("payments")
+    .select("payment_date, amount, payment_method")
+    .gte("payment_date", range.start)
+    .lte("payment_date", range.end);
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return (data ?? []) as PaymentRow[];
+}
+
+function normalizePaymentMethod(method: string): CashbookPaymentMethodBreakdownItem["method"] {
+  return method === "cash" || method === "bank_transfer" || method === "cheque" ? method : "other";
+}
+
+function paymentMethodLabel(method: CashbookPaymentMethodBreakdownItem["method"]): string {
+  const labels: Record<CashbookPaymentMethodBreakdownItem["method"], string> = {
+    cash: "Cash",
+    bank_transfer: "Bank Transfer",
+    cheque: "Cheque",
+    other: "Other",
+  };
+
+  return labels[method];
+}
+
+async function getPaymentMethodBreakdownData(supabase: SupabaseClient, range: DateRange): Promise<{ paymentMethods: CashbookPaymentMethodBreakdownItem[]; cashMovement: CashbookCashMovement }> {
+  const [payments, incomeRows, expenseRows] = await Promise.all([
+    getPaymentRows(supabase, range),
+    getPerformanceIncomeRows(supabase, range),
+    getPerformanceExpenseRows(supabase, range),
+  ]);
+  const byMethod = new Map<CashbookPaymentMethodBreakdownItem["method"], CashbookPaymentMethodBreakdownItem>();
+
+  function ensureMethod(method: CashbookPaymentMethodBreakdownItem["method"]): CashbookPaymentMethodBreakdownItem {
+    const existing = byMethod.get(method);
+    if (existing) {
+      return existing;
+    }
+
+    const next = {
+      method,
+      label: paymentMethodLabel(method),
+      invoicePaymentIncome: 0,
+      cashbookIncome: 0,
+      expenseOutflow: 0,
+      netMovement: 0,
+    };
+    byMethod.set(method, next);
+    return next;
+  }
+
+  ["cash", "bank_transfer", "cheque"].forEach((method) => ensureMethod(method as CashbookPaymentMethodBreakdownItem["method"]));
+
+  payments.forEach((payment) => {
+    const item = ensureMethod(normalizePaymentMethod(payment.payment_method));
+    item.invoicePaymentIncome = toMoney(item.invoicePaymentIncome + toMoney(payment.amount));
+  });
+
+  incomeRows.forEach((income) => {
+    const item = ensureMethod(normalizePaymentMethod(income.payment_method));
+    item.cashbookIncome = toMoney(item.cashbookIncome + toMoney(income.amount));
+  });
+
+  expenseRows.forEach((expense) => {
+    const item = ensureMethod(normalizePaymentMethod(expense.payment_method));
+    item.expenseOutflow = toMoney(item.expenseOutflow + toMoney(expense.amount));
+  });
+
+  const paymentMethods = Array.from(byMethod.values())
+    .map((item) => ({
+      ...item,
+      netMovement: toMoney(item.invoicePaymentIncome + item.cashbookIncome - item.expenseOutflow),
+    }))
+    .filter((item) => item.method !== "other" || item.invoicePaymentIncome > 0 || item.cashbookIncome > 0 || item.expenseOutflow > 0);
+
+  const cash = paymentMethods.find((item) => item.method === "cash");
+
+  return {
+    paymentMethods,
+    cashMovement: {
+      cashReceived: toMoney((cash?.invoicePaymentIncome ?? 0) + (cash?.cashbookIncome ?? 0)),
+      cashExpenses: toMoney(cash?.expenseOutflow ?? 0),
+      netCashMovement: toMoney((cash?.invoicePaymentIncome ?? 0) + (cash?.cashbookIncome ?? 0) - (cash?.expenseOutflow ?? 0)),
+    },
+  };
+}
+
+async function getBusinessAreaPerformanceData(
+  supabase: SupabaseClient,
+  range: DateRange,
+  totalIncome: number,
+  invoicePaymentTotal: number,
+  targets: CashbookTargetProgress[],
+): Promise<CashbookBusinessAreaPerformanceItem[]> {
+  const [incomeRows, expenseRows, areas] = await Promise.all([
+    getPerformanceIncomeRows(supabase, range),
+    getPerformanceExpenseRows(supabase, range),
+    supabase
+      .from("business_areas")
+      .select("id, name")
+      .eq("status", "active")
+      .is("deleted_at", null)
+      .order("sort_order", { ascending: true }),
+  ]);
+
+  if (areas.error) {
+    throw new Error(areas.error.message);
+  }
+
+  const areaNames = new Map(((areas.data ?? []) as NameRow[]).map((area) => [area.id, area.name ?? "Business area"]));
+  const rows = new Map<string, CashbookBusinessAreaPerformanceItem>();
+
+  function ensureArea(id: string, name: string): CashbookBusinessAreaPerformanceItem {
+    const existing = rows.get(id);
+    if (existing) {
+      return existing;
+    }
+
+    const targetStatus = targets.find((target) => target.businessAreaId === id)?.targetStatus ?? "Not set";
+    const next: CashbookBusinessAreaPerformanceItem = {
+      id,
+      name,
+      income: 0,
+      expenses: 0,
+      profit: 0,
+      profitMargin: null,
+      shareOfTotalIncome: 0,
+      targetStatus,
+    };
+    rows.set(id, next);
+    return next;
+  }
+
+  incomeRows.forEach((income) => {
+    const item = ensureArea(income.business_area_id, areaNames.get(income.business_area_id) ?? "Unknown area");
+    item.income = toMoney(item.income + toMoney(income.amount));
+  });
+
+  expenseRows.forEach((expense) => {
+    const areaId = expense.business_area_id ?? "unassigned_expenses";
+    const item = ensureArea(areaId, expense.business_area_id ? areaNames.get(expense.business_area_id) ?? "Unknown area" : "Unassigned Expenses");
+    item.expenses = toMoney(item.expenses + toMoney(expense.amount));
+  });
+
+  if (invoicePaymentTotal > 0) {
+    const item = ensureArea("invoice_income_unassigned", "Invoice Income / Unassigned");
+    item.income = toMoney(item.income + invoicePaymentTotal);
+  }
+
+  return Array.from(rows.values())
+    .map((item) => {
+      const profit = toMoney(item.income - item.expenses);
+      return {
+        ...item,
+        profit,
+        profitMargin: item.income > 0 ? toMoney((profit / item.income) * 100) : null,
+        shareOfTotalIncome: totalIncome > 0 ? toMoney((item.income / totalIncome) * 100) : 0,
+      };
+    })
+    .sort((a, b) => b.income - a.income);
+}
+
+async function getExpenseCategoryAnalysisData(supabase: SupabaseClient, range: DateRange): Promise<CashbookExpenseCategoryAnalysis> {
+  const [expenseRows, categories] = await Promise.all([
+    getPerformanceExpenseRows(supabase, range),
+    supabase
+      .from("cashbook_expense_categories")
+      .select("id, name, code")
+      .is("deleted_at", null),
+  ]);
+
+  if (categories.error) {
+    throw new Error(categories.error.message);
+  }
+
+  const categoryNames = new Map(((categories.data ?? []) as NameRow[]).map((category) => [category.id, category.name ?? "Expense category"]));
+  const categoryCodes = new Map(((categories.data ?? []) as NameRow[]).map((category) => [category.id, category.code ?? ""]));
+  const totals = new Map<string, number>();
+
+  expenseRows.forEach((expense) => {
+    totals.set(expense.expense_category_id, toMoney((totals.get(expense.expense_category_id) ?? 0) + toMoney(expense.amount)));
+  });
+
+  const totalExpenses = toMoney(Array.from(totals.values()).reduce((sum, amount) => sum + amount, 0));
+  const categoryItems: CashbookExpenseCategoryAnalysisItem[] = Array.from(totals.entries())
+    .map(([id, total]) => ({
+      id,
+      name: categoryNames.get(id) ?? "Unknown category",
+      total,
+      percentOfExpenses: totalExpenses > 0 ? toMoney((total / totalExpenses) * 100) : 0,
+    }))
+    .sort((a, b) => b.total - a.total);
+  const salaryTotal = toMoney(expenseRows
+    .filter((expense) => {
+      const name = (categoryNames.get(expense.expense_category_id) ?? "").toLowerCase();
+      const code = (categoryCodes.get(expense.expense_category_id) ?? "").toLowerCase();
+      return name.includes("salary") || name.includes("salaries") || code.includes("salary");
+    })
+    .reduce((sum, expense) => sum + toMoney(expense.amount), 0));
+
+  return {
+    totalExpenses,
+    largestCategory: categoryItems[0] ?? null,
+    salaryTotal,
+    categories: categoryItems,
+  };
+}
+
+async function getStudentKpis(supabase: SupabaseClient): Promise<CashbookStudentKpis> {
+  const monthStart = currentMonthStart();
+  const [
+    activeResult,
+    newActiveResult,
+  ] = await Promise.all([
+    supabase
+      .from("students")
+      .select("id", { count: "exact", head: true })
+      .eq("status", "active")
+      .is("deleted_at", null),
+    supabase
+      .from("students")
+      .select("id", { count: "exact", head: true })
+      .eq("status", "active")
+      .is("deleted_at", null)
+      .gte("created_at", `${monthStart}T00:00:00`),
+  ]);
+
+  if (activeResult.error) {
+    throw new Error(activeResult.error.message);
+  }
+
+  if (newActiveResult.error) {
+    throw new Error(newActiveResult.error.message);
+  }
+
+  return {
+    activeStudents: activeResult.count ?? 0,
+    newActiveStudentsThisMonth: newActiveResult.count ?? 0,
+    archivedOrInactiveThisMonth: null,
+    limitation: "Archived or inactivated student counts are deferred until a reliable status-change reporting view is introduced.",
+  };
+}
+
+function buildInsights(
+  summary: SummaryTotals,
+  previousSummary: SummaryTotals,
+  businessAreas: CashbookBusinessAreaPerformanceItem[],
+  expenseAnalysis: CashbookExpenseCategoryAnalysis,
+  targets: CashbookTargetProgress[],
+  outstandingInvoices: CashbookPerformanceDashboard["outstandingInvoices"],
+): CashbookManagementInsight[] {
+  const insights: CashbookManagementInsight[] = [];
+  const bestArea = businessAreas.filter((area) => area.id !== "unassigned_expenses").sort((a, b) => b.profit - a.profit)[0];
+  const revenueTarget = targets.find((target) => target.targetType === "revenue" && !target.businessAreaId);
+  const profitTarget = targets.find((target) => target.targetType === "profit" && !target.businessAreaId);
+
+  if (bestArea) {
+    insights.push({
+      title: "Best-performing area",
+      detail: `${bestArea.name} leads this period with ${toMoney(bestArea.profit).toLocaleString("en-GB")} MAD net profit based on recorded income and tagged expenses.`,
+      tone: "sage",
+    });
+  }
+
+  if (expenseAnalysis.largestCategory) {
+    insights.push({
+      title: "Largest expense category",
+      detail: `${expenseAnalysis.largestCategory.name} is the largest category at ${toMoney(expenseAnalysis.largestCategory.total).toLocaleString("en-GB")} MAD, representing ${expenseAnalysis.largestCategory.percentOfExpenses}% of recorded expenses.`,
+      tone: "yellow",
+    });
+  }
+
+  const incomeComparison = buildComparison(summary.totalIncome, previousSummary.totalIncome);
+  insights.push({
+    title: "Income movement",
+    detail: incomeComparison.isNeutral ? "No previous-period income is available for comparison." : `Total income is ${incomeComparison.label} compared with the previous period.`,
+    tone: summary.totalIncome >= previousSummary.totalIncome ? "sage" : "coral",
+  });
+
+  const profitComparison = buildComparison(summary.netProfit, previousSummary.netProfit);
+  insights.push({
+    title: "Profit movement",
+    detail: profitComparison.isNeutral ? "No previous-period profit is available for comparison." : `Net profit is ${profitComparison.label} compared with the previous period.`,
+    tone: summary.netProfit >= previousSummary.netProfit ? "sage" : "coral",
+  });
+
+  if (revenueTarget) {
+    insights.push({
+      title: "Revenue run-rate",
+      detail: `Revenue is projected at ${toMoney(revenueTarget.projectedMonthEndValue).toLocaleString("en-GB")} MAD with ${toMoney(revenueTarget.averageRequiredPerRemainingDay).toLocaleString("en-GB")} MAD average required per remaining day.`,
+      tone: "navy",
+    });
+  }
+
+  if (profitTarget) {
+    insights.push({
+      title: "Profit projection",
+      detail: `Profit is projected at ${toMoney(profitTarget.projectedMonthEndValue).toLocaleString("en-GB")} MAD based on the current monthly target view.`,
+      tone: profitTarget.projectedMonthEndValue >= profitTarget.targetValue ? "sage" : "yellow",
+    });
+  }
+
+  if (outstandingInvoices.totalOutstanding > 0) {
+    insights.push({
+      title: "Outstanding invoice watch",
+      detail: `${outstandingInvoices.unpaidInvoiceCount} invoice(s) remain outstanding, totalling ${toMoney(outstandingInvoices.totalOutstanding).toLocaleString("en-GB")} MAD.`,
+      tone: "coral",
+    });
+  }
+
+  return insights.slice(0, 7);
+}
+
+export async function getBusinessPerformanceDashboard(profile: UserProfile, period: CashbookPerformancePeriod): Promise<CashbookPerformanceDashboard> {
+  noStore();
+
+  if (!canViewBusinessPerformance(profile)) {
+    throw new Error("forbidden");
+  }
+
+  const supabase = await createCashbookSupabaseClient();
+  const definition = getPeriodDefinition(period);
+  const [
+    currentDailyRows,
+    previousDailyRows,
+    trendRows,
+    targets,
+    outstandingResult,
+    studentKpis,
+  ] = await Promise.all([
+    getSummaryRows(supabase, definition.current),
+    getSummaryRows(supabase, definition.previous),
+    period === "year" ? getMonthlySummaryRows(supabase, definition.current) : getSummaryRows(supabase, definition.current),
+    listCurrentMonthTargetProgress(profile),
+    getOutstandingInvoiceSummary(supabase),
+    getStudentKpis(supabase),
+  ]);
+  const currentSummary = aggregateSummaryRows(currentDailyRows);
+  const previousSummary = aggregateSummaryRows(previousDailyRows);
+  const profitMargin = currentSummary.totalIncome > 0 ? toMoney((currentSummary.netProfit / currentSummary.totalIncome) * 100) : 0;
+  const previousProfitMargin = previousSummary.totalIncome > 0 ? toMoney((previousSummary.netProfit / previousSummary.totalIncome) * 100) : 0;
+  const [
+    businessAreas,
+    expenseAnalysis,
+    paymentBreakdown,
+  ] = await Promise.all([
+    getBusinessAreaPerformanceData(supabase, definition.current, currentSummary.totalIncome, currentSummary.invoicePaymentTotal, targets),
+    getExpenseCategoryAnalysisData(supabase, definition.current),
+    getPaymentMethodBreakdownData(supabase, definition.current),
+  ]);
+  const summaryCards: CashbookExecutiveSummaryMetric[] = [
+    buildSummaryCard("invoice_payments", "Invoice Payments Received", currentSummary.invoicePaymentTotal, previousSummary.invoicePaymentTotal, "Received invoice payments only", "sage"),
+    buildSummaryCard("cashbook_income", "Cashbook Income", currentSummary.cashbookIncomeTotal, previousSummary.cashbookIncomeTotal, "Daily income outside invoices", "coral"),
+    buildSummaryCard("total_income", "Total Income", currentSummary.totalIncome, previousSummary.totalIncome, "Payments received plus cashbook income", "navy"),
+    buildSummaryCard("expenses", "Expenses", currentSummary.expenseTotal, previousSummary.expenseTotal, "Recorded expenses only", "yellow"),
+    buildSummaryCard("net_profit", "Net Profit", currentSummary.netProfit, previousSummary.netProfit, "Total income minus expenses", currentSummary.netProfit >= 0 ? "sage" : "coral"),
+    buildSummaryCard("outstanding_invoices", "Outstanding Invoices", outstandingResult.summary.totalOutstanding, 0, `${outstandingResult.summary.unpaidInvoiceCount} unpaid invoice(s)`, "coral"),
+    buildSummaryCard("profit_margin", "Profit Margin", profitMargin, previousProfitMargin, "Net profit divided by total income", "navy", "percent"),
+  ];
+
+  return {
+    period,
+    periodLabel: definition.label,
+    currentRange: definition.current,
+    previousRange: definition.previous,
+    summaryCards,
+    outstandingInvoices: outstandingResult.summary,
+    todayBusinessGoal: {
+      revenueTarget: targets.find((target) => target.targetType === "revenue" && !target.businessAreaId) ?? null,
+    },
+    monthlyTargets: targets,
+    studentKpis,
+    trends: mapTrendRows(trendRows, period),
+    businessAreas,
+    expenseAnalysis,
+    paymentMethods: paymentBreakdown.paymentMethods,
+    cashMovement: paymentBreakdown.cashMovement,
+    insights: buildInsights(currentSummary, previousSummary, businessAreas, expenseAnalysis, targets, outstandingResult.summary),
+  };
 }

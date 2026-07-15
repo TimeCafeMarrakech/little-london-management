@@ -16,6 +16,7 @@ export const cashbookIncomeStatusSchema = z.enum(["recorded", "void", "archived"
 export const cashbookExpenseStatusSchema = z.enum(["recorded", "void", "archived"]);
 export const cashbookTargetStatusSchema = z.enum(["active", "archived"]);
 export const cashbookTargetTypeSchema = z.enum(["revenue", "profit", "expense_budget", "active_students"]);
+export const cashbookPerformancePeriodSchema = z.enum(["today", "week", "month", "year"]).default("month");
 
 export const cashbookIncomeFormSchema = z.object({
   incomeDate: z.string().date("Choose an income date."),
@@ -106,3 +107,4 @@ export type CashbookExpenseFormInput = z.infer<typeof cashbookExpenseFormSchema>
 export type CashbookExpenseListQuery = z.infer<typeof cashbookExpenseListQuerySchema>;
 export type CashbookTargetFormInput = z.infer<typeof cashbookTargetFormSchema>;
 export type CashbookTargetListQuery = z.infer<typeof cashbookTargetListQuerySchema>;
+export type CashbookPerformancePeriod = z.infer<typeof cashbookPerformancePeriodSchema>;
