@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 type CashbookTabsProps = {
-  active: "income" | "expenses" | "targets" | "performance";
+  active: "income" | "expenses" | "targets" | "performance" | "reports";
 };
 
 export function CashbookTabs({ active }: CashbookTabsProps) {
@@ -10,6 +10,7 @@ export function CashbookTabs({ active }: CashbookTabsProps) {
     { id: "expenses" as const, label: "Expenses", href: "/cashbook/expenses" },
     { id: "targets" as const, label: "Targets", href: "/cashbook/targets" },
     { id: "performance" as const, label: "Performance", href: "/cashbook/performance" },
+    { id: "reports" as const, label: "Reports", href: "/cashbook/reports" },
   ];
 
   return (
