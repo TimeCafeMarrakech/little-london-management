@@ -4,13 +4,10 @@ import type { ReactNode } from "react";
 import {
   ArrowRight,
   BarChart3,
-  ChevronDown,
-  Globe2,
   Heart,
   LockKeyhole,
   Mail,
   ShieldCheck,
-  Sparkles,
   UsersRound,
 } from "lucide-react";
 
@@ -96,7 +93,6 @@ export function PlayLearnAuthShell({ children, compact = false }: PlayLearnAuthS
       >
         {!compact ? <BrandPanel /> : null}
         <div className="flex min-h-[calc(100vh-2rem)] items-center justify-center lg:min-h-0">{children}</div>
-        {!compact ? <MobileBrandSummary /> : null}
       </div>
     </section>
   );
@@ -105,7 +101,6 @@ export function PlayLearnAuthShell({ children, compact = false }: PlayLearnAuthS
 export function PlayLearnAuthCard({ children, eyebrow, title, subtitle, centered = false }: PlayLearnAuthCardProps) {
   return (
     <div className="relative w-full max-w-[640px] overflow-hidden rounded-[2rem] border border-white/90 bg-white/[0.96] px-6 pb-4 pt-16 shadow-[0_34px_95px_rgba(23,50,74,0.16)] backdrop-blur md:px-12 md:pb-5 md:pt-20">
-      <LanguagePill />
       <div className="absolute -right-14 top-36 h-28 w-28 rounded-full bg-[#D9EFE4]/70" aria-hidden="true" />
       <div className="absolute -left-12 bottom-24 h-24 w-24 rounded-full bg-[#D9EFE4]/85" aria-hidden="true" />
 
@@ -146,32 +141,10 @@ export function PlayLearnInput({ id, name, label, type, autoComplete, placeholde
   );
 }
 
-export function DisabledSocialButtons() {
-  return (
-    <div className="space-y-2">
-      <div className="flex items-center gap-3 text-sm font-medium text-[#52677A]">
-        <span className="h-px flex-1 bg-[#D9E1E8]" />
-        or continue with
-        <span className="h-px flex-1 bg-[#D9E1E8]" />
-      </div>
-      <div className="mx-auto grid max-w-[300px] grid-cols-3 gap-5">
-        <SocialButton label="Google" icon={<GoogleMark />} />
-        <SocialButton label="Microsoft" icon={<MicrosoftMark />} />
-        <SocialButton label="Apple" icon={<AppleMark />} />
-      </div>
-      <p className="mx-auto w-fit rounded-full bg-[#F8F6F2] px-3 py-1 text-xs font-medium text-[#52677A]">Coming Soon</p>
-      <CardLandscape />
-    </div>
-  );
-}
-
 export function SupportFooter() {
   return (
-    <p className="mt-2 text-center text-sm text-[#718397]">
-      Need help?{" "}
-      <Link className="font-semibold text-[#F24A3A] hover:underline" href="mailto:support@littlelondon.local">
-        Contact Support
-      </Link>
+    <p className="mt-5 text-center text-sm leading-6 text-[#718397]">
+      Need access help? Contact your Little London administrator.
     </p>
   );
 }
@@ -238,47 +211,6 @@ function BrandPanel() {
   );
 }
 
-function MobileBrandSummary() {
-  return (
-    <div className="rounded-[1.5rem] border border-white/70 bg-[#FFF9EF]/90 p-5 shadow-[0_20px_55px_rgba(23,50,74,0.1)] lg:hidden">
-      <LittleLondonPlayLogo />
-      <p className="mt-5 text-2xl font-extrabold leading-tight text-[#17324A]">
-        Where Little Minds Grow, <span className="text-[#F24A3A]">Play, Learn & Shine</span>
-      </p>
-      <div className="mt-5 grid grid-cols-2 gap-3">
-        {featureHighlights.map((feature) => (
-          <div className="rounded-2xl bg-white/80 p-3 text-sm font-semibold text-[#17324A]" key={feature.label}>
-            {feature.label}
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function LanguagePill() {
-  return (
-    <div className="absolute right-6 top-20 z-30 hidden items-center gap-2 rounded-xl border border-[#D9E1E8] bg-white/70 px-4 py-2 text-sm font-medium text-[#17324A] shadow-sm md:flex">
-      <Globe2 className="h-4 w-4" aria-hidden="true" />
-      English
-      <ChevronDown className="h-4 w-4" aria-hidden="true" />
-    </div>
-  );
-}
-
-function SocialButton({ label, icon }: { label: string; icon: ReactNode }) {
-  return (
-    <button
-      aria-label={`${label} sign-in coming soon`}
-      className="flex h-16 items-center justify-center rounded-xl border border-[#D9E1E8] bg-white/80 opacity-75 shadow-sm transition"
-      disabled
-      type="button"
-    >
-      {icon}
-    </button>
-  );
-}
-
 function ClassroomIllustration() {
   return (
     <div className="relative h-full min-h-[340px]" aria-hidden="true">
@@ -293,22 +225,6 @@ function ClassroomIllustration() {
         />
         <div className="absolute inset-0 bg-gradient-to-r from-[#FFF9EF]/20 via-transparent to-transparent" />
         <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-[#FFF9EF] to-transparent" />
-      </div>
-    </div>
-  );
-}
-
-function CardLandscape() {
-  return (
-    <div className="relative -mx-6 mt-1 h-12 overflow-hidden bg-[#E9F6EE] md:-mx-12" aria-hidden="true">
-      <div className="absolute inset-x-0 bottom-0 h-8 bg-[#A8C3B0]/70" />
-      <div className="absolute bottom-6 left-10 h-7 w-11 rounded-full bg-[#D9EFE4]" />
-      <div className="absolute bottom-6 right-12 h-7 w-11 rounded-full bg-[#D9EFE4]" />
-      <div className="absolute bottom-3 left-1/2 h-9 w-28 -translate-x-1/2 rounded-t-2xl bg-[#8EC9A7]" />
-      <div className="absolute bottom-10 left-1/2 h-7 w-20 -translate-x-1/2 bg-[#F24A3A] [clip-path:polygon(50%_0,100%_100%,0_100%)]" />
-      <div className="absolute bottom-4 left-[calc(50%-1.2rem)] h-6 w-5 rounded-t-md bg-[#C98512]" />
-      <div className="absolute bottom-11 left-[calc(50%+3rem)] text-[#F6B33D]">
-        <Sparkles className="h-4 w-4" />
       </div>
     </div>
   );
@@ -336,36 +252,6 @@ function PendantLamp() {
         <div className="absolute left-1/2 top-11 h-40 w-56 -translate-x-1/2 bg-[linear-gradient(to_bottom,rgba(255,232,168,0.34),rgba(255,232,168,0.12)_45%,rgba(255,232,168,0)_100%)] [clip-path:polygon(42%_0,58%_0,100%_100%,0_100%)] blur-xl" />
       </div>
     </div>
-  );
-}
-
-function GoogleMark() {
-  return (
-    <svg aria-hidden="true" className="h-7 w-7" viewBox="0 0 48 48">
-      <path d="M44.5 24.5c0-1.6-.1-2.8-.4-4.1H24v7.8h11.8c-.2 2-1.5 5-4.4 7l-.1.5 6.4 5 .4.1c4.1-3.8 6.4-9.3 6.4-16.3Z" fill="#4285F4" />
-      <path d="M24 45c5.8 0 10.7-1.9 14.2-5.2l-6.8-5.3c-1.8 1.3-4.3 2.2-7.4 2.2-5.7 0-10.5-3.8-12.2-9l-.5.1-6.6 5.1-.1.5C8.1 40.2 15.3 45 24 45Z" fill="#34A853" />
-      <path d="M11.8 27.7c-.5-1.3-.7-2.7-.7-4.2s.3-2.9.7-4.2l-.1-.5-6.7-5.2-.4.2C3 16.8 2 20.3 2 23.5s1 6.7 2.6 9.7l7.2-5.5Z" fill="#FBBC05" />
-      <path d="M24 10.3c4 0 6.7 1.7 8.2 3.2l6-5.9C34.7 4.3 29.8 2 24 2 15.3 2 8.1 6.8 4.6 13.8l7.2 5.5c1.8-5.2 6.5-9 12.2-9Z" fill="#EA4335" />
-    </svg>
-  );
-}
-
-function MicrosoftMark() {
-  return (
-    <svg aria-hidden="true" className="h-7 w-7" viewBox="0 0 28 28">
-      <path d="M2 2h11.4v11.4H2V2Z" fill="#F25022" />
-      <path d="M14.6 2H26v11.4H14.6V2Z" fill="#7FBA00" />
-      <path d="M2 14.6h11.4V26H2V14.6Z" fill="#00A4EF" />
-      <path d="M14.6 14.6H26V26H14.6V14.6Z" fill="#FFB900" />
-    </svg>
-  );
-}
-
-function AppleMark() {
-  return (
-    <svg aria-hidden="true" className="h-7 w-7 text-black" fill="currentColor" viewBox="0 0 24 24">
-      <path d="M16.4 1.8c.1 1.1-.4 2.2-1.1 3-.8.9-2 1.6-3.1 1.5-.1-1.1.4-2.2 1.1-3 .8-.9 2.1-1.6 3.1-1.5Zm3.5 16.8c-.6 1.3-.9 1.8-1.7 3-.9 1.3-2.1 2.9-3.6 2.9-1.4 0-1.7-.9-3.6-.9s-2.3.9-3.6.9c-1.5.1-2.7-1.4-3.6-2.8-2.5-3.6-2.8-7.8-1.2-10 1.1-1.6 2.9-2.5 4.6-2.5 1.7 0 2.8.9 4.2.9 1.4 0 2.2-.9 4.2-.9 1.5 0 3.1.8 4.2 2.2-3.7 2-3.1 7.3.1 8.2Z" />
-    </svg>
   );
 }
 
