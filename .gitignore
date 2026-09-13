@@ -11,3 +11,5 @@ dist/
 *.log
 *.tsbuildinfo
 .npm-cache/
+
+.vercel
