@@ -3,6 +3,7 @@
 import { CalendarPlus, ClipboardCheck, FilePlus2, Menu, UserPlus, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { createPortal } from "react-dom";
 import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -59,7 +60,7 @@ export function MobileNavigation({ profile }: MobileNavigationProps) {
         <span className="text-sm font-semibold">Menu</span>
       </Button>
 
-      {open ? (
+      {open ? createPortal(
         <div className="fixed inset-0 z-50 bg-[#0f2d47]/30 backdrop-blur-sm" role="dialog" aria-modal="true" aria-label="Application menu">
           <button className="absolute inset-0" aria-label="Close menu" onClick={() => setOpen(false)} type="button" />
           <div className="relative flex h-full w-[min(92vw,390px)] flex-col overflow-hidden rounded-r-[1.75rem] bg-[#fffaf3] p-5 text-[#0f2d47] shadow-2xl">
@@ -119,7 +120,8 @@ export function MobileNavigation({ profile }: MobileNavigationProps) {
               })}
             </nav>
           </div>
-        </div>
+        </div>,
+        document.body,
       ) : null}
     </div>
   );
