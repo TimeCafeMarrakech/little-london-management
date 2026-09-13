@@ -2,6 +2,7 @@ import { DashboardContent } from "@/components/dashboard/dashboard-content";
 import { ParentDashboardOverview, ParentDashboardPanels, ParentPortalHero } from "@/components/parent-portal/parent-portal-ui";
 import { requireUserProfile } from "@/lib/auth/session";
 import { getParentPortalData } from "@/services/parent-portal/parent-portal-service";
+import { getManagementDashboardData } from "@/services/dashboard/dashboard-service";
 
 export const dynamic = "force-dynamic";
 
@@ -20,5 +21,7 @@ export default async function DashboardPage() {
     );
   }
 
-  return <DashboardContent profile={profile} />;
+  const data = await getManagementDashboardData(profile);
+
+  return <DashboardContent profile={profile} data={data} />;
 }
