@@ -218,10 +218,10 @@ export const dashboardExperiences: Record<UserRole, DashboardExperience> = {
 };
 
 export const notificationItems: Record<UserRole, string[]> = {
-  super_admin: ["Phase 3 shell ready for review", "Multi-branch remains future scope"],
-  admin: ["One teacher workload review", "Two placeholder parent follow-ups"],
-  teacher: ["Class note reminder", "New announcement for teachers"],
-  parent: ["New announcement available", "Upcoming class reminder"],
+  super_admin: ["Review today's operations", "Check outstanding finance items"],
+  admin: ["Review today's attendance", "Check parent follow-ups"],
+  teacher: ["Complete today's attendance", "Review assigned classes"],
+  parent: ["Review your family dashboard", "Check upcoming classes"],
 };
 
 export const shellHighlights = [

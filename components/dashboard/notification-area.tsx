@@ -6,9 +6,9 @@ type NotificationAreaProps = {
 
 export function NotificationArea({ items }: NotificationAreaProps) {
   const notificationRows = [
-    { text: items[0] ?? "Phase 3 shell ready for review", meta: "10:30 AM", icon: CheckCircle2, tone: "bg-[#8cc9a8]/20 text-[#4ca36e]" },
-    { text: items[1] ?? "Multi-branch remains future scope", meta: "Yesterday", icon: Info, tone: "bg-[#fff2cf] text-[#d6a02c]" },
-    { text: "Holiday Camp registrations", meta: "12 new this week", icon: CalendarDays, tone: "bg-[#f24a3a]/10 text-[#f24a3a]" },
+    { text: items[0] ?? "Review today's operations", meta: "Today", icon: CheckCircle2, tone: "bg-[#8cc9a8]/20 text-[#4ca36e]" },
+    { text: items[1] ?? "Check outstanding follow-ups", meta: "This week", icon: Info, tone: "bg-[#fff2cf] text-[#d6a02c]" },
+    { text: "Upcoming events", meta: "Open the Events area for details", icon: CalendarDays, tone: "bg-[#f24a3a]/10 text-[#f24a3a]" },
   ];
 
   return (

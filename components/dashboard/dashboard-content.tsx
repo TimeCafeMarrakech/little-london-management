@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import {
   ArrowRight,
   BarChart3,
@@ -72,10 +73,10 @@ const outstandingInvoices = [
 ];
 
 const quickActions = [
-  { label: "Add Student", helper: "Prepare a new child profile", icon: UserPlus },
-  { label: "Create Invoice", helper: "Start a billing draft", icon: FilePlus2 },
-  { label: "Mark Attendance", helper: "Open today's attendance flow", icon: ClipboardCheck },
-  { label: "Create Event", helper: "Plan a workshop or camp", icon: CalendarDays },
+  { label: "Add Student", helper: "Create a new child profile", icon: UserPlus, href: "/students/new" },
+  { label: "Create Invoice", helper: "Start a new invoice", icon: FilePlus2, href: "/invoices/new" },
+  { label: "Mark Attendance", helper: "Open today's attendance flow", icon: ClipboardCheck, href: "/attendance" },
+  { label: "Create Event", helper: "Plan a workshop or camp", icon: CalendarDays, href: "/events/new" },
 ];
 
 const kpiToneClasses: Record<(typeof heroPulse)[number]["tone"], { card: string; icon: string; blob: string }> = {
@@ -130,6 +131,7 @@ function trendFillPoints(values: number[]): string {
 export function DashboardContent({ profile }: DashboardContentProps) {
   const experience = dashboardExperiences[profile.role];
   const notifications = notificationItems[profile.role];
+  const firstName = profile.fullName.trim().split(/\s+/)[0] || "there";
 
   return (
     <div className="space-y-6">
@@ -155,7 +157,7 @@ export function DashboardContent({ profile }: DashboardContentProps) {
                   );
                 })}
               </div>
-              <p className="text-base font-semibold text-[#f24a3a]">Welcome back, Noura</p>
+              <p className="text-base font-semibold text-[#f24a3a]">Welcome back, {firstName}</p>
               <h1 className="mt-3 max-w-[680px] text-[clamp(2.25rem,4vw,3.35rem)] font-bold leading-[1.08] tracking-tight text-[#0f2d47]">
                 <span className="block xl:whitespace-nowrap">Little London</span>
                 <span className="block xl:whitespace-nowrap">Operations Centre</span>
@@ -381,7 +383,7 @@ export function DashboardContent({ profile }: DashboardContentProps) {
           <div>
             <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#f24a3a]">Quick actions</p>
             <h2 className="mt-2 text-xl font-semibold tracking-tight text-[#0f2d47]">Frequent operations</h2>
-            <p className="mt-2 text-sm leading-6 text-[#5b6f82]">Presentation-only action cards for the core operations team.</p>
+            <p className="mt-2 text-sm leading-6 text-[#5b6f82]">Jump straight into the tasks you use most often.</p>
           </div>
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
             {quickActions.map((action) => {
@@ -389,19 +391,21 @@ export function DashboardContent({ profile }: DashboardContentProps) {
 
               return (
                 <Button
+                  asChild
                   className="h-auto justify-start rounded-2xl border-[#dde5ec] bg-white/80 p-4 text-left text-[#0f2d47] shadow-inner-soft hover:bg-[#fff8ee]"
                   key={action.label}
-                  type="button"
                   variant="outline"
                 >
-                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#f24a3a]/10 text-[#f24a3a]">
-                    <Icon className="h-5 w-5" aria-hidden="true" />
-                  </span>
-                  <span className="min-w-0">
-                    <span className="block text-sm font-semibold">{action.label}</span>
-                    <span className="mt-1 block whitespace-normal text-xs font-medium text-[#5b6f82]">{action.helper}</span>
-                  </span>
-                  <ArrowRight className="ml-auto h-4 w-4 shrink-0" aria-hidden="true" />
+                  <Link href={action.href}>
+                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#f24a3a]/10 text-[#f24a3a]">
+                      <Icon className="h-5 w-5" aria-hidden="true" />
+                    </span>
+                    <span className="min-w-0">
+                      <span className="block text-sm font-semibold">{action.label}</span>
+                      <span className="mt-1 block whitespace-normal text-xs font-medium text-[#5b6f82]">{action.helper}</span>
+                    </span>
+                    <ArrowRight className="ml-auto h-4 w-4 shrink-0" aria-hidden="true" />
+                  </Link>
                 </Button>
               );
             })}
