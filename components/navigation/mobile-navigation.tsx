@@ -61,9 +61,9 @@ export function MobileNavigation({ profile }: MobileNavigationProps) {
       </Button>
 
       {open ? createPortal(
-        <div className="fixed inset-0 z-50 bg-[#0f2d47]/30 backdrop-blur-sm" role="dialog" aria-modal="true" aria-label="Application menu">
+        <div className="fixed inset-0 z-50 h-[100dvh] w-screen bg-[#0f2d47]/30 backdrop-blur-sm" role="dialog" aria-modal="true" aria-label="Application menu">
           <button className="absolute inset-0" aria-label="Close menu" onClick={() => setOpen(false)} type="button" />
-          <div className="relative flex h-full w-[min(92vw,390px)] flex-col overflow-hidden rounded-r-[1.75rem] bg-[#fffaf3] p-5 text-[#0f2d47] shadow-2xl">
+          <div className="fixed inset-y-0 left-0 flex h-[100dvh] min-h-screen w-[min(92vw,390px)] flex-col overflow-hidden rounded-r-[1.75rem] bg-[#fffaf3] p-5 text-[#0f2d47] shadow-2xl">
             <div className="flex shrink-0 items-center justify-between">
               <div className="flex items-center gap-3">
                 <MobileLogoMark />
